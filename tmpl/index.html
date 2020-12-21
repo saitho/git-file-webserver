@@ -1,0 +1,14 @@
+<h1>Git Repo</h1>
+<h2>Git Remote: {{ .Cfg.Git.Url }}</h2>
+
+{{ if .ShowBranches }}
+<h2>Branches</h2>
+{{ range $value := .Branches }}<a href="/branch/{{ . }}">{{ . }}<br></a>{{ end }}
+{{ end }}
+
+{{ if .ShowTags }}
+<h2>Tags</h2>
+{{ range $value := .Tags }}
+<a href="/tag/{{ .Tag }}">{{ .Tag }} ({{ .Date }})<br></a>
+{{ end }}
+{{ end }}

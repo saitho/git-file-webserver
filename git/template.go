@@ -15,7 +15,7 @@ func (g *GitHandler) renderContent(refType string, content string, refName strin
 	// Render HTML template for folders and list all files there
 
 	contentLines := strings.Split(content, "\n")
-	t, err := template.ParseFiles("tmpl/dir.html") // Parse template file.
+	t, err := template.ParseFiles("tmpl/dir.html")
 	if err != nil {
 		return "", err
 	}
@@ -43,7 +43,7 @@ func (g *GitHandler) renderContent(refType string, content string, refName strin
 }
 
 type TmplParams struct {
-	Cfg            config.Config
+	Cfg            *config.Config
 	RefType        string
 	Path           string
 	ParentPath     string

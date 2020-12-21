@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path"
 	"strconv"
 	"strings"
@@ -16,7 +17,7 @@ import (
 const DownloadLocation = "./git_downloads"
 
 type GitHandler struct {
-	Cfg config.Config
+	Cfg *config.Config
 }
 
 func (g *GitHandler) getCacheFilePath() string {
@@ -24,6 +25,16 @@ func (g *GitHandler) getCacheFilePath() string {
 }
 func (g *GitHandler) getDownloadPath() string {
 	return path.Join(DownloadLocation, g.Cfg.Git.Url)
+}
+
+func (g *GitHandler) runGitCommand(args ...string) (string, error) {
+	cmd := exec.Command("git", args...)
+	cmd.Dir = g.getDownloadPath()
+	output, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	return string(output), nil
 }
 
 func (g *GitHandler) ServePath(refType string, refName string, filePath string) (string, error) {

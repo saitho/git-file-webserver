@@ -5,3 +5,8 @@ git:
   cache_time: 3600 # cache 60 minutes
 files:
   - "**/*.json"
+display:
+  index:
+    show_branches: true
+    show_tags: true
+    tags_order: desc

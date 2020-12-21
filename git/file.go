@@ -1,7 +1,6 @@
 package git
 
 import (
-	"os/exec"
 	"path"
 	"strings"
 
@@ -13,13 +12,7 @@ func IsErrGitFileNotFound(err error) bool {
 }
 
 func (g *GitHandler) getFileContent(branchName string, filePath string) (string, error) {
-	cmd := exec.Command("git", "show", g.getShowRef(branchName, filePath))
-	cmd.Dir = g.getDownloadPath()
-	output, err := cmd.Output()
-	if err != nil {
-		return "", err
-	}
-	return string(output), nil
+	return g.runGitCommand("show", g.getShowRef(branchName, filePath))
 }
 
 func (g *GitHandler) isFolder(content string, refName string, filePath string) bool {

@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"github.com/saitho/static-git-file-server/config"
 	"github.com/saitho/static-git-file-server/git"
 	"github.com/saitho/static-git-file-server/webserver"
+	"html/template"
 	"net/http"
+	"strings"
 )
 
 func main() {
@@ -32,19 +35,47 @@ func main() {
 		content, err := gitHandler.ServePath(req.Params[0], req.Params[1], filePath)
 		if err != nil {
 			if git.IsErrGitFileNotFound(err) {
-				resp.Text(404, "Requested file not found.")
+				resp.Text(http.StatusNotFound, "Requested file not found.")
 				return
 			}
-			resp.Text(500, err.Error())
+			resp.Text(http.StatusInternalServerError, err.Error())
 			return
 		}
-		resp.HTML(200, content)
+		resp.HTML(http.StatusOK, content)
 	}
 
 	server.AddHandler(`^/(branch|tag)/(.*)/-/(.*)`, handler)
 	server.AddHandler(`^/(branch|tag)/(.*)/?$`, handler)
 	server.AddHandler(`^/$`, func(resp *webserver.Response, req *webserver.Request) {
-		resp.Text(http.StatusOK, "index")
+		tplFuncMap := make(template.FuncMap)
+		tplFuncMap["Split"] = strings.Split
+		t, err := template.New("index.html").Funcs(tplFuncMap).ParseFiles("tmpl/index.html")
+		if err != nil {
+			resp.Text(http.StatusInternalServerError, err.Error())
+			return
+		}
+		var tpl bytes.Buffer
+		type IndexTmplParams struct {
+			Cfg          *config.Config
+			ShowBranches bool
+			ShowTags     bool
+			Branches     []string
+			Tags         []git.GitTag
+		}
+		params := IndexTmplParams{
+			Cfg:          cfg,
+			ShowBranches: cfg.Display.Index.ShowBranches,
+			ShowTags:     cfg.Display.Index.ShowTags,
+			Branches:     gitHandler.GetBranches(),
+			Tags:         gitHandler.GetTags(),
+		}
+
+		if err := t.Execute(&tpl, params); err != nil {
+			resp.Text(http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		resp.HTML(http.StatusOK, tpl.String())
 	})
 	server.Run()
 
