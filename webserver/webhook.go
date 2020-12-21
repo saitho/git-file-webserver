@@ -38,10 +38,8 @@ func GitHubWebHookEndpoint(cfg *config.Config, gitHandler *git.GitHandler) Handl
 		switch cfg.Git.Update.Mode {
 		case config.GitUpdateModeWebhookGitHub:
 			processGitHubWebhook(cfg, gitHandler).ServeHTTP(resp, req.Request)
-			break
 		default:
 			resp.Text(http.StatusInternalServerError, "Unknown webhook update mode.")
-			break
 		}
 	}
 }
