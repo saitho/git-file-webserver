@@ -7,6 +7,7 @@ import (
 	"github.com/markbates/pkger"
 	"github.com/saitho/static-git-file-server/rendering"
 	"net/http"
+	"time"
 
 	"github.com/saitho/static-git-file-server/config"
 	"github.com/saitho/static-git-file-server/git"
@@ -74,6 +75,7 @@ func main() {
 			ShowTags     bool
 			Branches     []string
 			Tags         []git.GitTag
+			LastUpdate   time.Time
 		}
 
 		content, err := rendering.RenderTemplate("/tmpl/index.html", IndexTmplParams{
@@ -82,6 +84,7 @@ func main() {
 			ShowTags:     cfg.Display.Index.ShowTags,
 			Branches:     gitHandler.GetBranches(),
 			Tags:         gitHandler.GetTags(),
+			LastUpdate:   time.Unix(gitHandler.GetUpdatedTime(), 0),
 		})
 		if err != nil {
 			resp.Text(http.StatusInternalServerError, err.Error())

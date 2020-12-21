@@ -32,6 +32,12 @@ func (g *GitHandler) DownloadRepository() error {
 	return nil
 }
 
+func (g *GitHandler) GetUpdatedTime() int64 {
+	cacheFile, _ := ioutil.ReadFile(g.getCacheFilePath())
+	cacheTime, _ := strconv.Atoi(string(cacheFile))
+	return int64(cacheTime)
+}
+
 func (g *GitHandler) IsUpToDate() bool {
 	// File does not exist
 	_, err := os.Stat(g.getDownloadPath())
@@ -44,9 +50,7 @@ func (g *GitHandler) IsUpToDate() bool {
 	}
 
 	// Check if cache is up to date (within cacheTime interval)
-	cacheFile, _ := ioutil.ReadFile(g.getCacheFilePath())
-	cacheTime, _ := strconv.Atoi(string(cacheFile))
-	return time.Now().Unix() <= int64(cacheTime+g.Cfg.Git.Update.Cache.Time)
+	return time.Now().Unix() <= (g.GetUpdatedTime() + int64(g.Cfg.Git.Update.Cache.Time))
 }
 
 func (g *GitHandler) GetBranches() []string {

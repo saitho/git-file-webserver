@@ -1,6 +1,10 @@
-<h1>Git Repo</h1>
-<h2>Git Remote: {{ .Cfg.Git.Url }}</h2>
+<header>
+    <h1>Git Repo</h1>
+    <h2>Git Remote: {{ .Cfg.Git.Url }}</h2>
+    <h3>Last Update: {{ .LastUpdate }}</h3>
+</header>
 
+<main>
 {{ if .ShowBranches }}
 <h2>Branches</h2>
 {{ range $value := .Branches }}<a href="/branch/{{ . }}">{{ . }}<br></a>{{ end }}
@@ -12,3 +16,9 @@
 <a href="/tag/{{ .Tag }}">{{ .Tag }} {{ if $.Cfg.Display.Tags.ShowDate }}({{ .Date }}){{ end }}<br/></a>
 {{ end }}
 {{ end }}
+</main>
+
+<footer>
+    <hr />
+    Powered by <a href="https://github.com/saitho/git-file-webserver" target="_blank">Git File Webserver</a>
+</footer>
