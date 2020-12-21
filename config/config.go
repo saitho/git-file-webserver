@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"os"
@@ -8,9 +8,9 @@ import (
 
 type Config struct {
 	Git struct {
-		Url string
-		WorkDir string `yaml:"work_dir"`
-		CacheTime int `yaml:"cache_time"`
+		Url       string
+		WorkDir   string `yaml:"work_dir"`
+		CacheTime int    `yaml:"cache_time"`
 	}
 	Files []string
 }

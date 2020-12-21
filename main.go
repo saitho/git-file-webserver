@@ -2,7 +2,9 @@ package main
 
 import (
 	"flag"
-	"log"
+	"github.com/saitho/static-git-file-server/config"
+	"github.com/saitho/static-git-file-server/git"
+	"github.com/saitho/static-git-file-server/webserver"
 	"net/http"
 )
 
@@ -11,21 +13,35 @@ func main() {
 	configPath := flag.String("c", "config.yml", "path to config file")
 	flag.Parse()
 
-	cfg, err := LoadConfig(*configPath)
+	cfg, err := config.LoadConfig(*configPath)
 	if err != nil {
 		panic(err)
 	}
 
-	app := NewRequestHandler()
-	git := GitHandler{Cfg: cfg}
-	app.Handle(`^/(branch|tag)/(.*)/-/(.*)`, git.ServePath())
-	app.Handle(`^/(branch|tag)/(.*)/?$`, git.ServePath())
+	gitHandler := git.GitHandler{Cfg: cfg}
+	server := webserver.Webserver{
+		Port:       *port,
+		ConfigPath: *configPath,
+	}
 
-	app.Handle(`^/$`, func(resp *Response, req *Request) {
+	handler := func(resp *webserver.Response, req *webserver.Request) {
+		filePath := ""
+		if len(req.Params) > 2 {
+			filePath = req.Params[2]
+		}
+		content, err := gitHandler.ServePath(req.Params[0], req.Params[1], filePath)
+		if err != nil {
+			resp.Text(500, err.Error())
+			return
+		}
+		resp.HTML(200, content)
+	}
+
+	server.AddHandler(`^/(branch|tag)/(.*)/-/(.*)`, handler)
+	server.AddHandler(`^/(branch|tag)/(.*)/?$`, handler)
+	server.AddHandler(`^/$`, func(resp *webserver.Response, req *webserver.Request) {
 		resp.Text(http.StatusOK, "index")
 	})
-
-	log.Printf("Serving with config at %s on HTTP port: %s\n", *configPath, *port)
-	log.Fatal(http.ListenAndServe("0.0.0.0:"+ *port, app))
+	server.Run()
 
 }

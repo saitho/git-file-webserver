@@ -1,4 +1,4 @@
-package main
+package webserver
 
 import (
 	"fmt"
@@ -53,7 +53,6 @@ func (a *RequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	a.DefaultRoute(resp, req)
 }
-
 
 type Request struct {
 	*http.Request
