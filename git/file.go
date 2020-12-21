@@ -34,7 +34,7 @@ func (g *GitHandler) matchesFileGlob(pathWithParent string, branchName string) (
 	} else {
 		for _, globString := range g.Cfg.Files {
 			regExp := glob.Globexp(globString)
-			matchPath := strings.TrimLeft(pathWithParent, "/")
+			matchPath := strings.TrimPrefix(pathWithParent, "/")
 			match := regExp.Match([]byte(matchPath))
 			// fmt.Printf("-- path is file - %s - %s- %b\n", matchPath, regExp, match)
 			if match {

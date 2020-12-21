@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	pkger.Include("/tmpl")
+	_ = pkger.Include("/tmpl")
 
 	port := flag.String("p", "80", "port to serve on")
 	configPath := flag.String("c", "config.yml", "path to config file")

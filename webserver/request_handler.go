@@ -1,6 +1,7 @@
 package webserver
 
 import (
+	"github.com/saitho/static-git-file-server/config"
 	"io"
 	"net/http"
 	"regexp"
@@ -79,7 +80,8 @@ func (r *Response) Auto(code int, body string) {
 
 func (r *Response) send(code int, contentType string, body string) {
 	r.Header().Set("Content-Type", contentType)
+	r.Header().Set("Git-File-Webserver-Version", config.VERSION)
 	r.WriteHeader(code)
 
-	io.WriteString(r, body)
+	_, _ = io.WriteString(r, body)
 }

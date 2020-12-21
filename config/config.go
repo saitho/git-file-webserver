@@ -7,6 +7,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+var VERSION = "dev"
+
 type Config struct {
 	Git struct {
 		Url       string
@@ -28,7 +30,7 @@ type Config struct {
 
 func LoadConfig(configPath string) (*Config, error) {
 	cfg := &Config{}
-	defaults.Set(cfg)
+	_ = defaults.Set(cfg)
 
 	f, err := os.Open(configPath)
 	if err != nil {

@@ -56,7 +56,7 @@ func (g *GitHandler) ServePath(refType string, refName string, filePath string) 
 		}
 	}
 
-	refName = strings.TrimRight(refName, "/")
+	refName = strings.TrimSuffix(refName, "/")
 	content, err := g.getFileContent(refName, filePath)
 	if err != nil {
 		if IsErrGitFileNotFound(err) {
