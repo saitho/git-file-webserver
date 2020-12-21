@@ -9,6 +9,6 @@
 {{ if .ShowTags }}
 <h2>Tags</h2>
 {{ range $value := .Tags }}
-<a href="/tag/{{ .Tag }}">{{ .Tag }} ({{ .Date }})<br></a>
+<a href="/tag/{{ .Tag }}">{{ .Tag }} {{ if $.Cfg.Display.Tags.ShowDate }}({{ .Date }}){{ end }}<br/></a>
 {{ end }}
 {{ end }}

@@ -14,10 +14,13 @@ type Config struct {
 		CacheTime int    `yaml:"cache_time"`
 	}
 	Display struct {
+		Tags struct {
+			Order    string `default:"desc" yaml:"order"`
+			ShowDate bool   `default:"true" yaml:"show_date"`
+		}
 		Index struct {
-			ShowBranches bool   `default:"true" yaml:"show_branches"`
-			ShowTags     bool   `default:"true" yaml:"show_tags"`
-			TagsOrder    string `default:"desc" yaml:"tags_order"`
+			ShowBranches bool `default:"true" yaml:"show_branches"`
+			ShowTags     bool `default:"true" yaml:"show_tags"`
 		}
 	}
 	Files []string

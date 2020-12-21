@@ -42,7 +42,7 @@ type GitTag struct {
 
 func (g *GitHandler) GetTags() []GitTag {
 	sortPrefix := "-" // default: desc
-	if strings.ToLower(g.Cfg.Display.Index.TagsOrder) == "asc" {
+	if strings.ToLower(g.Cfg.Display.Tags.Order) == "asc" {
 		sortPrefix = ""
 	}
 
