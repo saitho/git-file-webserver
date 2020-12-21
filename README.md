@@ -17,10 +17,22 @@ This was originally built for publishing up-to-date JSONSchema files per version
 
 ## Usage
 
-You may use the Docker image as below:
+You may use the binaries from our [release section](https://github.com/saitho/git-file-webserver/releases), build one yourself or use our [pre-made Docker container](https://hub.docker.com/r/saitho/git-file-webserver).
+
+### Docker
+
+Webserver is served at port 8080.
 
 ```
 docker run -p 8080:80 -v "`pwd`/config.yml.dist":/config/config.yml saitho/git-file-webserver:latest
+```
+
+### Binary
+
+Requires Git to be installed! Webserver is served at port 8080.
+
+```
+./git-file-webserver -p 8080 -c config.yml.dist
 ```
 
 ## Configuration
