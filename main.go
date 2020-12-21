@@ -31,6 +31,10 @@ func main() {
 		}
 		content, err := gitHandler.ServePath(req.Params[0], req.Params[1], filePath)
 		if err != nil {
+			if git.IsErrGitFileNotFound(err) {
+				resp.Text(404, "Requested file not found.")
+				return
+			}
 			resp.Text(500, err.Error())
 			return
 		}

@@ -48,6 +48,9 @@ func (g *GitHandler) ServePath(refType string, refName string, filePath string) 
 	refName = strings.TrimRight(refName, "/")
 	content, err := g.getFileContent(refName, filePath)
 	if err != nil {
+		if IsErrGitFileNotFound(err) {
+			return "", err
+		}
 		return "", fmt.Errorf("GitShow (%s): %s", g.getShowRef(refName, filePath), err.Error())
 	}
 	return g.renderContent(refType, content, refName, filePath)

@@ -8,6 +8,10 @@ import (
 	"gopkg.in/godo.v2/glob"
 )
 
+func IsErrGitFileNotFound(err error) bool {
+	return err.Error() == "exit status 128"
+}
+
 func (g *GitHandler) getFileContent(branchName string, filePath string) (string, error) {
 	cmd := exec.Command("git", "show", g.getShowRef(branchName, filePath))
 	cmd.Dir = g.getDownloadPath()
