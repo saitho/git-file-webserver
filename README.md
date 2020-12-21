@@ -1,5 +1,9 @@
 # Static Git File Server
 
+[![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/go-semantic-release/semantic-release)
+[![CI](https://github.com/saitho/git-file-webserver/workflows/CI/badge.svg?branch=master)](https://github.com/saitho/git-file-webserver/actions?query=workflow%3ACI+branch%3Amaster)
+[![Go Report Card](https://goreportcard.com/badge/github.com/saitho/git-file-webserver)](https://goreportcard.com/report/github.com/saitho/git-file-webserver)
+
 ## Features
 
 This is binary allows serving selective content of a Git repository.
