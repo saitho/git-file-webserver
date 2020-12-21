@@ -41,7 +41,7 @@ func main() {
 			resp.Text(http.StatusInternalServerError, err.Error())
 			return
 		}
-		resp.HTML(http.StatusOK, content)
+		resp.Auto(http.StatusOK, content)
 	}
 
 	server.AddHandler(`^/(branch|tag)/(.*)/-/(.*)`, handler)

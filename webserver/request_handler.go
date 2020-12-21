@@ -1,10 +1,11 @@
 package webserver
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"regexp"
+
+	"github.com/gabriel-vasile/mimetype"
 )
 
 type Handler func(*Response, *Request)
@@ -64,14 +65,21 @@ type Response struct {
 }
 
 func (r *Response) Text(code int, body string) {
-	r.Header().Set("Content-Type", "text/plain")
-	r.WriteHeader(code)
-
-	io.WriteString(r, fmt.Sprintf("%s\n", body))
+	r.send(code, "text/plain", body)
 }
+
 func (r *Response) HTML(code int, body string) {
-	r.Header().Set("Content-Type", "text/html")
+	r.send(code, "text/html", body)
+}
+
+func (r *Response) Auto(code int, body string) {
+	contentType := mimetype.Detect([]byte(body)).String()
+	r.send(code, contentType, body)
+}
+
+func (r *Response) send(code int, contentType string, body string) {
+	r.Header().Set("Content-Type", contentType)
 	r.WriteHeader(code)
 
-	io.WriteString(r, fmt.Sprintf("%s\n", body))
+	io.WriteString(r, body)
 }
