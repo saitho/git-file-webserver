@@ -6,15 +6,23 @@
 
 <main>
 {{ if .ShowBranches }}
-<h2>Branches</h2>
-{{ range $value := .Branches }}<a href="/branch/{{ . }}">{{ . }}<br></a>{{ end }}
+    <h2>Branches</h2>
+    {{ if not .Branches }}
+        This repository has no branches yet.
+    {{ else }}
+        {{ range $value := .Branches }}<a href="/branch/{{ . }}">{{ . }}<br></a>{{ end }}
+    {{ end }}
 {{ end }}
 
 {{ if .ShowTags }}
-<h2>Tags</h2>
-{{ range $value := .Tags }}
-<a href="/tag/{{ .Tag }}">{{ .Tag }} {{ if $.Cfg.Display.Tags.ShowDate }}({{ .Date }}){{ end }}<br/></a>
-{{ end }}
+    <h2>Tags</h2>
+    {{ if not .Tags }}
+        This repository has no tags yet.
+    {{ else }}
+        {{ range $value := .Tags }}
+            <a href="/tag/{{ .Tag }}">{{ .Tag }} {{ if $.Cfg.Display.Tags.ShowDate }}({{ .Date }}){{ end }}<br/></a>
+        {{ end }}
+    {{ end }}
 {{ end }}
 </main>
 
