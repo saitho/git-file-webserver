@@ -1,0 +1,14 @@
+<html>
+<head>
+    <title>Index of {{ .Path }}/ on {{ .RefType }} {{ .Ref }}</title>
+</head>
+<body>
+<h1>Index of {{ .Path }}/ on {{ .RefType }} <i>{{ .Ref }}</i></h1>
+<h2>Git Remote: {{ .Cfg.Git.Url }}</h2>
+<hr>
+<pre>
+{{ if ne .Path "" }}<a href="/{{ $.RefType }}/{{ $.Ref }}/-/{{ .ParentPath }}">../</a>{{ end }}
+{{ range $value := .Files }}<a href="/{{ $.RefType }}/{{ $.Ref }}/-/{{ $.Path }}/{{ . }}">{{ . }}<br></a>{{ end }}
+</pre>
+<hr>
+</body></html>
