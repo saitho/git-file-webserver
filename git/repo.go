@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/go-git/go-git/v5"
+
+	"github.com/saitho/static-git-file-server/config"
 )
 
 func (g *GitHandler) DownloadRepository() error {
@@ -37,10 +39,14 @@ func (g *GitHandler) IsUpToDate() bool {
 		return false
 	}
 
-	// Check download date
+	if g.Cfg.Git.Update.Mode != config.GitUpdateModeCache {
+		return true
+	}
+
+	// Check if cache is up to date (within cacheTime interval)
 	cacheFile, _ := ioutil.ReadFile(g.getCacheFilePath())
 	cacheTime, _ := strconv.Atoi(string(cacheFile))
-	return time.Now().Unix() <= int64(cacheTime+g.Cfg.Git.CacheTime)
+	return time.Now().Unix() <= int64(cacheTime+g.Cfg.Git.Update.Cache.Time)
 }
 
 func (g *GitHandler) GetBranches() []string {

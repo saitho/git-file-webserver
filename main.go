@@ -25,7 +25,7 @@ func main() {
 		panic(err)
 	}
 
-	gitHandler := git.GitHandler{Cfg: cfg}
+	gitHandler := &git.GitHandler{Cfg: cfg}
 	initRepo := func() error {
 		if !gitHandler.IsUpToDate() {
 			if err := gitHandler.DownloadRepository(); err != nil {
@@ -60,6 +60,7 @@ func main() {
 		resp.Auto(http.StatusOK, content)
 	}
 
+	server.AddHandler(`^/webhook/github`, webserver.GitHubWebHookEndpoint(cfg, gitHandler))
 	server.AddHandler(`^/(branch|tag)/(.*)/-/(.*)`, handler)
 	server.AddHandler(`^/(branch|tag)/(.*)/?$`, handler)
 	server.AddHandler(`^/$`, func(resp *webserver.Response, req *webserver.Request) {

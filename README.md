@@ -47,15 +47,26 @@ Inside the `git` section you have to set the path to your repository in `url` se
 Additionally you may set a `work_dir`, which means that only the files in this directory are considered to be served.
 **Note:** As of right now this is a global option. Keep that in mind if the folder name changes in releases or branches.
 
-The `cache_time` specifies when the repository content is invalidated and updated.
-This will be eventually replaced or extended by Webhook functionality, so it is automatically updated when changes are pushed.
+Updating the repository can be done two ways: time-based (cache-like) or webhook-based (mirror-like).
+
+Setting the `update.mode` to "cache" will refresh the repository every hour (per default).
+You may change the update time by setting `update.cache.time` (in seconds).
+
+Setting the `update.mode` to "webhook_github" will refresh the repository on new commits or tags to the repository.
+The repository needs to be setup manually for that (see below).
 
 ```yaml
 ---
 git:
   url: https://github.com/getstackhead/stackhead.git
   work_dir: schemas
-  cache_time: 3600 # default: 60 minutes
+  update:
+    mode: cache # either "cache" (default) or "webhook_github"
+    cache:
+       time: 3600 # default: 60 minutes
+    webhook:
+      github:
+        secret: foobar # secret to be used with GitHub webhook
 ```
 
 ### files
@@ -88,3 +99,34 @@ display:
     show_branches: true
     show_tags: true
 ```
+
+## Mirroring with Webhooks
+
+If you want to update the repository whenever something is pushed or tagged in your repository, you can use GitHub webhooks.
+
+Set the `mode` in `git.update` subsection to "webhook_github" and define a `secret`.
+
+```yaml
+---
+git:
+  update:
+    mode: webhook_github
+    webhook:
+      github:
+        secret: your-secret-here
+```
+
+Then, create your webhook on GitHub as follows:
+
+1. Go to your Repository Settings
+2. Select the "Webhooks" option in the left navigation menu
+3. Click the button "Add webhook" at the top right
+4. Add set your server URL as "Payload URL" (ending with `/webhook`), e.g. `https://schema.stackhead.io/webhook`
+5. Select "application/json" as "Content type"
+6. Set your secret from configuration as "Secret"
+7. Choose the option "Let me select individual events." and enable the folowing events:
+   * Branch or tag creation
+   * Branch or tag deletion
+   * Pushes
+
+You're ready to go. New changes to your repository should be mirrored automatically to your webserver.

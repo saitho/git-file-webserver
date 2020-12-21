@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/creasty/defaults"
@@ -9,11 +10,25 @@ import (
 
 var VERSION = "dev"
 
+var GitUpdateModeCache = "cache"
+var GitUpdateModeWebhookGitHub = "webhook_github"
+
 type Config struct {
 	Git struct {
 		Url       string
 		WorkDir   string `yaml:"work_dir"`
-		CacheTime int    `yaml:"cache_time"`
+		CacheTime int    `yaml:"cache_time"` // deprecated: use Git.Update.Cache.Time instead
+		Update    struct {
+			Mode  string `default:"cache"` // cache or webhook_github
+			Cache struct {
+				Time int `yaml:"time"`
+			}
+			WebHook struct {
+				GitHub struct {
+					Secret string
+				}
+			} `yaml:"webhook"`
+		}
 	}
 	Display struct {
 		Tags struct {
@@ -43,5 +58,12 @@ func LoadConfig(configPath string) (*Config, error) {
 	if err != nil {
 		return cfg, err
 	}
+
+	// Deprecations
+	if cfg.Git.CacheTime > 0 {
+		cfg.Git.Update.Cache.Time = cfg.Git.CacheTime
+		fmt.Printf("Configuration setting Git.CacheTime is deprecated. Use Git.Update.Cache.Time instead.")
+	}
+
 	return cfg, nil
 }

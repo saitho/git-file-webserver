@@ -2,7 +2,13 @@
 git:
   url: https://github.com/getstackhead/stackhead.git
   work_dir: schemas
-  cache_time: 3600 # cache 60 minutes
+  update:
+    mode: cache
+    cache:
+      time: 3600 # cache time in seconds, default is 60 minutes
+    webhook:
+      github:
+        secret: foobar
 files:
   - "**/*.json"
 display:
