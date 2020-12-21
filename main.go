@@ -1,17 +1,21 @@
+//go:generate pkger
+
 package main
 
 import (
-	"bytes"
 	"flag"
+	"github.com/markbates/pkger"
+	"github.com/saitho/static-git-file-server/rendering"
+	"net/http"
+
 	"github.com/saitho/static-git-file-server/config"
 	"github.com/saitho/static-git-file-server/git"
 	"github.com/saitho/static-git-file-server/webserver"
-	"html/template"
-	"net/http"
-	"strings"
 )
 
 func main() {
+	pkger.Include("/tmpl")
+
 	port := flag.String("p", "80", "port to serve on")
 	configPath := flag.String("c", "config.yml", "path to config file")
 	flag.Parse()
@@ -47,14 +51,6 @@ func main() {
 	server.AddHandler(`^/(branch|tag)/(.*)/-/(.*)`, handler)
 	server.AddHandler(`^/(branch|tag)/(.*)/?$`, handler)
 	server.AddHandler(`^/$`, func(resp *webserver.Response, req *webserver.Request) {
-		tplFuncMap := make(template.FuncMap)
-		tplFuncMap["Split"] = strings.Split
-		t, err := template.New("index.html").Funcs(tplFuncMap).ParseFiles("tmpl/index.html")
-		if err != nil {
-			resp.Text(http.StatusInternalServerError, err.Error())
-			return
-		}
-		var tpl bytes.Buffer
 		type IndexTmplParams struct {
 			Cfg          *config.Config
 			ShowBranches bool
@@ -62,20 +58,20 @@ func main() {
 			Branches     []string
 			Tags         []git.GitTag
 		}
-		params := IndexTmplParams{
+
+		content, err := rendering.RenderTemplate("/tmpl/index.html", IndexTmplParams{
 			Cfg:          cfg,
 			ShowBranches: cfg.Display.Index.ShowBranches,
 			ShowTags:     cfg.Display.Index.ShowTags,
 			Branches:     gitHandler.GetBranches(),
 			Tags:         gitHandler.GetTags(),
-		}
-
-		if err := t.Execute(&tpl, params); err != nil {
+		})
+		if err != nil {
 			resp.Text(http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		resp.HTML(http.StatusOK, tpl.String())
+		resp.HTML(http.StatusOK, content)
 	})
 	server.Run()
 

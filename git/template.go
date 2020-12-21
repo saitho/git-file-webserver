@@ -1,11 +1,11 @@
 package git
 
 import (
-	"bytes"
-	"github.com/saitho/static-git-file-server/config"
-	"html/template"
 	"path"
 	"strings"
+
+	"github.com/saitho/static-git-file-server/config"
+	"github.com/saitho/static-git-file-server/rendering"
 )
 
 func (g *GitHandler) renderContent(refType string, content string, refName string, filePath string) (string, error) {
@@ -15,18 +15,13 @@ func (g *GitHandler) renderContent(refType string, content string, refName strin
 	// Render HTML template for folders and list all files there
 
 	contentLines := strings.Split(content, "\n")
-	t, err := template.ParseFiles("tmpl/dir.html")
-	if err != nil {
-		return "", err
-	}
-
-	var tpl bytes.Buffer
 	var pathChunks = strings.Split(filePath, "/")
 	parentPath := ""
 	if len(pathChunks) > 0 {
 		parentPath = strings.Join(pathChunks[:len(pathChunks)-1], "/")
 	}
-	var data = TmplParams{
+
+	return rendering.RenderTemplate("/tmpl/dir.html", TmplParams{
 		Cfg:            g.Cfg,
 		RefType:        refType,
 		Path:           filePath,
@@ -35,11 +30,7 @@ func (g *GitHandler) renderContent(refType string, content string, refName strin
 		FullParentPath: path.Join(g.Cfg.Git.WorkDir, parentPath),
 		Ref:            refName,
 		Files:          g.filterFiles(contentLines[2:], filePath, refName),
-	}
-	if err := t.Execute(&tpl, data); err != nil {
-		return "", err
-	}
-	return tpl.String(), nil
+	})
 }
 
 type TmplParams struct {

@@ -2,3 +2,4 @@
 git_downloads
 static-git-file-server
 config.yml
+pkged.go
