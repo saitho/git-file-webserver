@@ -1,14 +1,36 @@
 package git
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/go-git/go-git/v5"
 )
 
-func (g *GitHandler) isUpToDate() bool {
+func (g *GitHandler) DownloadRepository() error {
+	if err := os.RemoveAll(g.getDownloadPath()); err != nil {
+		return fmt.Errorf("RemoveAll: %s", err.Error())
+	}
+	_, err := git.PlainClone(g.getDownloadPath(), false, &git.CloneOptions{
+		URL:      g.Cfg.Git.Url,
+		Progress: os.Stdout,
+		Depth:    1,
+	})
+	if err != nil {
+		return fmt.Errorf("PlainClone: %s", err.Error())
+	}
+	err = ioutil.WriteFile(g.getCacheFilePath(), []byte(strconv.Itoa(int(time.Now().Unix()))), 0644)
+	if err != nil {
+		return fmt.Errorf("WriteFile: %s", err.Error())
+	}
+	return nil
+}
+
+func (g *GitHandler) IsUpToDate() bool {
 	// File does not exist
 	_, err := os.Stat(g.getDownloadPath())
 	if os.IsNotExist(err) {

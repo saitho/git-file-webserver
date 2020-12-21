@@ -26,12 +26,24 @@ func main() {
 	}
 
 	gitHandler := git.GitHandler{Cfg: cfg}
+	initRepo := func() error {
+		if !gitHandler.IsUpToDate() {
+			if err := gitHandler.DownloadRepository(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
 	server := webserver.Webserver{
 		Port:       *port,
 		ConfigPath: *configPath,
 	}
 
 	handler := func(resp *webserver.Response, req *webserver.Request) {
+		if err := initRepo(); err != nil {
+			resp.Text(http.StatusInternalServerError, err.Error())
+			return
+		}
 		filePath := ""
 		if len(req.Params) > 2 {
 			filePath = req.Params[2]
@@ -51,6 +63,10 @@ func main() {
 	server.AddHandler(`^/(branch|tag)/(.*)/-/(.*)`, handler)
 	server.AddHandler(`^/(branch|tag)/(.*)/?$`, handler)
 	server.AddHandler(`^/$`, func(resp *webserver.Response, req *webserver.Request) {
+		if err := initRepo(); err != nil {
+			resp.Text(http.StatusInternalServerError, err.Error())
+			return
+		}
 		type IndexTmplParams struct {
 			Cfg          *config.Config
 			ShowBranches bool
