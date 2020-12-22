@@ -70,12 +70,7 @@ type GitTag struct {
 }
 
 func (g *GitHandler) GetTags() []GitTag {
-	sortPrefix := "-" // default: desc
-	if strings.ToLower(g.Cfg.Display.Tags.Order) == "asc" {
-		sortPrefix = ""
-	}
-
-	output, _ := g.runGitCommand("for-each-ref", "--sort="+sortPrefix+"creatordate", "--format=%(refname)---%(creatordate)", "refs/tags")
+	output, _ := g.runGitCommand("for-each-ref", "--sort=-creatordate", "--format=%(refname)---%(creatordate)", "refs/tags")
 	var tags []GitTag
 	for _, v := range strings.Split(output, "\n") {
 		if v == "" {

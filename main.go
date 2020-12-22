@@ -7,6 +7,7 @@ import (
 	"github.com/markbates/pkger"
 	"github.com/saitho/static-git-file-server/rendering"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/saitho/static-git-file-server/config"
@@ -78,12 +79,20 @@ func main() {
 			LastUpdate   time.Time
 		}
 
+		tags := gitHandler.GetTags()
+		if strings.ToLower(cfg.Display.Tags.Order) == "asc" {
+			// Reverse array
+			for i, j := 0, len(tags)-1; i < j; i, j = i+1, j-1 {
+				tags[i], tags[j] = tags[j], tags[i]
+			}
+		}
+
 		content, err := rendering.RenderTemplate("/tmpl/index.html", IndexTmplParams{
 			Cfg:          cfg,
 			ShowBranches: cfg.Display.Index.ShowBranches,
 			ShowTags:     cfg.Display.Index.ShowTags,
 			Branches:     gitHandler.GetBranches(),
-			Tags:         gitHandler.GetTags(),
+			Tags:         tags,
 			LastUpdate:   time.Unix(gitHandler.GetUpdatedTime(), 0),
 		})
 		if err != nil {
