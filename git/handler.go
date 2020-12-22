@@ -49,5 +49,5 @@ func (g *GitHandler) getShowRef(branchName string, filePath string) string {
 	if dirPath == "." {
 		dirPath += "/"
 	}
-	return branchName + ":" + dirPath
+	return "origin/" + branchName + ":" + dirPath
 }

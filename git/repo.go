@@ -54,11 +54,11 @@ func (g *GitHandler) IsUpToDate() bool {
 }
 
 func (g *GitHandler) GetBranches() []string {
-	output, _ := g.runGitCommand("branch", "-l", "--no-color")
+	output, _ := g.runGitCommand("branch", "-l", "-r", "--no-color")
 	var branches []string
 	for _, v := range strings.Split(output, "\n") {
-		v = strings.TrimPrefix(v, "*")
 		v = strings.TrimSpace(v)
+		v = strings.TrimPrefix(v, "origin/")
 		branches = append(branches, v)
 	}
 	return branches
