@@ -31,7 +31,11 @@ type Config struct {
 		}
 	}
 	Display struct {
+		Branches struct {
+			Filter []string
+		}
 		Tags struct {
+			Filter      []string
 			Order       string `default:"desc" yaml:"order"`
 			ShowDate    bool   `default:"true" yaml:"show_date"`
 			VirtualTags struct {

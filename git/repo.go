@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -53,6 +54,62 @@ func (g *GitHandler) IsUpToDate() bool {
 	return time.Now().Unix() <= (g.GetUpdatedTime() + int64(g.Cfg.Git.Update.Cache.Time))
 }
 
+func (g *GitHandler) filterBranches(references []string) []string {
+	filters := g.Cfg.Display.Branches.Filter
+	if len(filters) == 0 {
+		return references
+	}
+	var output []string
+	for _, v := range references {
+		valid := false
+		for _, f := range filters {
+			if strings.HasPrefix(f, "/") && strings.HasSuffix(f, "/") {
+				// RegEx
+				expression := strings.Trim(f, "/")
+				valid = regexp.MustCompile(expression).MatchString(v)
+			} else {
+				valid = f == v
+			}
+			if valid {
+				break
+			}
+		}
+		if !valid {
+			continue
+		}
+		output = append(output, v)
+	}
+	return output
+}
+
+func (g *GitHandler) filterTags(references []GitTag) []GitTag {
+	filters := g.Cfg.Display.Tags.Filter
+	if len(filters) == 0 {
+		return references
+	}
+	var output []GitTag
+	for _, v := range references {
+		valid := false
+		for _, f := range filters {
+			if strings.HasPrefix(f, "/") && strings.HasSuffix(f, "/") {
+				// RegEx
+				expression := strings.Trim(f, "/")
+				valid = regexp.MustCompile(expression).MatchString(v.Tag)
+			} else {
+				valid = f == v.Tag
+			}
+			if valid {
+				break
+			}
+		}
+		if !valid {
+			continue
+		}
+		output = append(output, v)
+	}
+	return output
+}
+
 func (g *GitHandler) GetBranches() []string {
 	output, _ := g.runGitCommand("branch", "-l", "-r", "--no-color")
 	var branches []string
@@ -61,7 +118,7 @@ func (g *GitHandler) GetBranches() []string {
 		v = strings.TrimPrefix(v, "origin/")
 		branches = append(branches, v)
 	}
-	return branches
+	return g.filterBranches(branches)
 }
 
 type GitTag struct {
@@ -83,5 +140,6 @@ func (g *GitHandler) GetTags() []GitTag {
 			Date: intDate,
 		})
 	}
-	return tags
+
+	return g.filterTags(tags)
 }

@@ -85,14 +85,16 @@ files:
 
 In the `display` section you can define how the frontend should look like.
 
-You may change the `order` of tags or hide the tag date in `tags` subsection.
-
-You can also toggle the display of branches or tags for the index page in the `index` subsection.
-
 ```yaml
 ---
 display:
+  branches:
+     filter:
+        - master
+        - develop
+        - /feature/.*/ # regex: any feature branches
   tags:
+    filter: []
     order: desc
     show_date: true
     virtual_tags:
@@ -102,6 +104,10 @@ display:
     show_tags: true
 ```
 
+You may change the `order` of tags or hide the tag date in `tags` subsection.
+
+You can also toggle the display of branches or tags for the index page in the `index` subsection.
+
 #### Virtual tags
 
 Virtual major tags will always point to the latest version inside a major release.
@@ -109,11 +115,22 @@ They can be enabled by setting `display.tags.virtual_tags.enable_semver_major` t
 
 This only will consider semantic versions.
 
-_Example:_ Given the versions v1.0.0, v1.1.0, v2.0.0, two virtual tags "v1" and "v2" will be displayed.
+_Example:_ Given the tags v1.0.0, v1.1.0, v2.0.0, two virtual tags "v1" and "v2" will be displayed.
 "v1" links to "v1.1.0" and "v2" links to "v2.0.0".
 Pushing a release "v2.0.1" will make "v2" automatically refer to "v2.0.1".
 
 This also works when you don't use the "v" prefix in your tags. The virtual tag will then also not have a "v" prefix.
+
+#### Filters
+
+Using the `filter` settings in _branches_ and _tags_ subsection you can filter which branches or tags should be displayed.
+Wrap the string in / to evaluate the inside as Golang regular expression.
+
+Note that the filters apply before the virtual tags.
+Given the repostory has two tags v1.0.0 and v1.1.0.
+For some reason, you exclude v1.1.0 via a filter.
+The virtual tag will then point to v1.0.0, not v1.1.0!
+
 
 ## Mirroring with Webhooks
 

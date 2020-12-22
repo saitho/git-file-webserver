@@ -12,6 +12,11 @@ git:
 files:
   - "**/*.json"
 display:
+  branches:
+    filter:
+      - master
+      - develop
+      - /feature/.*/ # regex: any feature branches
   tags:
     order: desc
     show_date: true
