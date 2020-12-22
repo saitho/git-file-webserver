@@ -52,5 +52,5 @@ func (g *GitHandler) getShowRef(refType string, refName string, filePath string)
 	if refType == "tag" {
 		return "refs/tags/" + refName + ":" + dirPath
 	}
-	return "refs/heads/" + refName + ":" + dirPath
+	return "origin/" + refName + ":" + dirPath
 }
