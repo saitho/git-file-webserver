@@ -4,14 +4,16 @@ package main
 
 import (
 	"flag"
-	"github.com/markbates/pkger"
-	"github.com/saitho/static-git-file-server/rendering"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/markbates/pkger"
+
 	"github.com/saitho/static-git-file-server/config"
 	"github.com/saitho/static-git-file-server/git"
+	"github.com/saitho/static-git-file-server/rendering"
 	"github.com/saitho/static-git-file-server/webserver"
 )
 
@@ -62,7 +64,29 @@ func main() {
 		resp.Auto(http.StatusOK, content)
 	}
 
+	resolveVirtualMajorTag := func(resp *webserver.Response, req *webserver.Request) {
+		majorVersion := req.Params[0]
+		path := ""
+		if len(req.Params) > 1 {
+			path = req.Params[1]
+		}
+
+		latestTag, err := git.ResolveVirtualTag(gitHandler, majorVersion)
+		if err != nil {
+			resp.Text(http.StatusInternalServerError, fmt.Sprintf("Unable to resolve tag %s", majorVersion))
+			return
+		}
+
+		req.Params = []string{"tag", latestTag.Tag, path}
+		handler(resp, req)
+	}
+
 	server.AddHandler(`^/webhook/github`, webserver.GitHubWebHookEndpoint(cfg, gitHandler))
+	if cfg.Display.Tags.VirtualTags.EnableSemverMajor {
+		server.AddHandler(`^/tag/(v?\d+)/-/(.*)`, resolveVirtualMajorTag)
+		server.AddHandler(`^/tag/(v?\d+)/?$`, resolveVirtualMajorTag)
+	}
+
 	server.AddHandler(`^/(branch|tag)/(.*)/-/(.*)`, handler)
 	server.AddHandler(`^/(branch|tag)/(.*)/?$`, handler)
 	server.AddHandler(`^/$`, func(resp *webserver.Response, req *webserver.Request) {
@@ -85,6 +109,10 @@ func main() {
 			for i, j := 0, len(tags)-1; i < j; i, j = i+1, j-1 {
 				tags[i], tags[j] = tags[j], tags[i]
 			}
+		}
+
+		if cfg.Display.Tags.VirtualTags.EnableSemverMajor {
+			tags = git.InsertVirtualTags(tags)
 		}
 
 		content, err := rendering.RenderTemplate("/tmpl/index.html", IndexTmplParams{

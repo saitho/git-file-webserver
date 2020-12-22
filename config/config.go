@@ -32,8 +32,11 @@ type Config struct {
 	}
 	Display struct {
 		Tags struct {
-			Order    string `default:"desc" yaml:"order"`
-			ShowDate bool   `default:"true" yaml:"show_date"`
+			Order       string `default:"desc" yaml:"order"`
+			ShowDate    bool   `default:"true" yaml:"show_date"`
+			VirtualTags struct {
+				EnableSemverMajor bool `default:"false" yaml:"enable_semver_major"`
+			} `yaml:"virtual_tags"`
 		}
 		Index struct {
 			ShowBranches bool `default:"true" yaml:"show_branches"`
