@@ -11,24 +11,27 @@ func IsErrGitFileNotFound(err error) bool {
 	return err.Error() == "exit status 128"
 }
 
-func (g *GitHandler) getFileContent(branchName string, filePath string) (string, error) {
-	return g.runGitCommand("show", g.getShowRef(branchName, filePath))
+func (g *GitHandler) getFileContent(refType string, refName string, filePath string) (string, error) {
+	return g.runGitCommand("show", g.getShowRef(refType, refName, filePath))
 }
 
-func (g *GitHandler) isFolder(content string, refName string, filePath string) bool {
+func (g *GitHandler) isFolder(content string, refType string, refName string, filePath string) bool {
 	contentLines := strings.Split(content, "\n")
-	return contentLines[0] == "tree "+g.getShowRef(refName, filePath)
+	return contentLines[0] == "tree "+g.getShowRef(refType, refName, filePath)
 }
 
-func (g *GitHandler) matchesFileGlob(pathWithParent string, branchName string) (bool, error) {
-	fileContent, err := g.getFileContent(branchName, pathWithParent)
+func (g *GitHandler) matchesFileGlob(pathWithParent string, refType string, refName string) (bool, error) {
+	if len(g.Cfg.Files) == 0 {
+		return true, nil
+	}
+	fileContent, err := g.getFileContent(refType, refName, pathWithParent)
 	if err != nil {
 		return false, err
 	}
 
-	if g.isFolder(fileContent, branchName, pathWithParent) {
+	if g.isFolder(fileContent, refType, refName, pathWithParent) {
 		filesInFolder := strings.Split(fileContent, "\n")[2:]
-		matchingFilesInFolder := g.filterFiles(filesInFolder, pathWithParent, branchName)
+		matchingFilesInFolder := g.filterFiles(filesInFolder, pathWithParent, refType, refName)
 		// fmt.Printf("-- path is folder - %s - %d\n", pathWithParent, len(matchingFilesInFolder))
 		return len(matchingFilesInFolder) > 0, nil
 	} else {
@@ -45,14 +48,14 @@ func (g *GitHandler) matchesFileGlob(pathWithParent string, branchName string) (
 	return false, nil
 }
 
-func (g *GitHandler) filterFiles(files []string, parentFolder string, branchName string) []string {
+func (g *GitHandler) filterFiles(files []string, parentFolder string, refType string, refName string) []string {
 	var newFiles []string
 	for _, file := range files {
 		if file == "" {
 			continue
 		}
 		pathWithParent := path.Join(parentFolder, file)
-		pathMatches, err := g.matchesFileGlob(pathWithParent, branchName)
+		pathMatches, err := g.matchesFileGlob(pathWithParent, refType, refName)
 		if err != nil {
 			panic("matchesFileGlob: " + err.Error())
 		}

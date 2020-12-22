@@ -9,7 +9,7 @@ import (
 )
 
 func (g *GitHandler) renderContent(refType string, content string, refName string, filePath string) (string, error) {
-	if !g.isFolder(content, refName, filePath) {
+	if !g.isFolder(content, refType, refName, filePath) {
 		return content, nil
 	}
 	// Render HTML template for folders and list all files there
@@ -29,7 +29,7 @@ func (g *GitHandler) renderContent(refType string, content string, refName strin
 		FullPath:       path.Join(g.Cfg.Git.WorkDir, filePath),
 		FullParentPath: path.Join(g.Cfg.Git.WorkDir, parentPath),
 		Ref:            refName,
-		Files:          g.filterFiles(contentLines[2:], filePath, refName),
+		Files:          g.filterFiles(contentLines[2:], filePath, refType, refName),
 	})
 }
 

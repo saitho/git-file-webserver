@@ -34,20 +34,23 @@ func (g *GitHandler) runGitCommand(args ...string) (string, error) {
 
 func (g *GitHandler) ServePath(refType string, refName string, filePath string) (string, error) {
 	refName = strings.TrimSuffix(refName, "/")
-	content, err := g.getFileContent(refName, filePath)
+	content, err := g.getFileContent(refType, refName, filePath)
 	if err != nil {
 		if IsErrGitFileNotFound(err) {
 			return "", err
 		}
-		return "", fmt.Errorf("GitShow (%s): %s", g.getShowRef(refName, filePath), err.Error())
+		return "", fmt.Errorf("GitShow (%s): %s", g.getShowRef(refType, refName, filePath), err.Error())
 	}
 	return g.renderContent(refType, content, refName, filePath)
 }
 
-func (g *GitHandler) getShowRef(branchName string, filePath string) string {
+func (g *GitHandler) getShowRef(refType string, refName string, filePath string) string {
 	dirPath := path.Join(".", g.Cfg.Git.WorkDir, filePath)
 	if dirPath == "." {
 		dirPath += "/"
 	}
-	return "origin/" + branchName + ":" + dirPath
+	if refType == "tag" {
+		return "refs/tags/" + refName + ":" + dirPath
+	}
+	return "refs/heads/" + refName + ":" + dirPath
 }

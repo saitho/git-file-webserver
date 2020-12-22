@@ -10,7 +10,7 @@
     {{ if not .Branches }}
         This repository has no branches yet.
     {{ else }}
-        {{ range $value := .Branches }}<a href="/branch/{{ . }}">{{ . }}<br></a>{{ end }}
+        {{ range .Branches }}<a href="/branch/{{ . }}">{{ . }}<br></a>{{ end }}
     {{ end }}
 {{ end }}
 
@@ -19,7 +19,7 @@
     {{ if not .Tags }}
         This repository has no tags yet.
     {{ else }}
-        {{ range $value := .Tags }}
+        {{ range .Tags }}
             <a href="/tag/{{ .Tag }}">{{ .Tag }} {{ if $.Cfg.Display.Tags.ShowDate }}({{ .Date }}){{ end }}<br/></a>
         {{ end }}
     {{ end }}
