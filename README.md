@@ -40,7 +40,7 @@ Requires Git to be installed! Webserver is served at port 8080.
 The `config.yml` file is used to configure the repository that should be displayed.
 It can also be used to limit the displayed files or set a work directory.
 
-### git
+### Git repository settings
 
 Inside the `git` section you have to set the path to your repository in `url` setting.
 
@@ -69,7 +69,7 @@ git:
         secret: foobar # secret to be used with GitHub webhook
 ```
 
-### files
+### File settings
 
 The `files` section is an array of fileglobs you can use to specify which files should be displayed.
 
@@ -81,7 +81,7 @@ files:
   - "**/*.json"
 ```
 
-### display
+### Display settings
 
 In the `display` section you can define how the frontend should look like.
 
@@ -95,10 +95,25 @@ display:
   tags:
     order: desc
     show_date: true
+    virtual_tags:
+      enable_semver_major: true
   index:
     show_branches: true
     show_tags: true
 ```
+
+#### Virtual tags
+
+Virtual major tags will always point to the latest version inside a major release.
+They can be enabled by setting `display.tags.virtual_tags.enable_semver_major` to true.
+
+This only will consider semantic versions.
+
+_Example:_ Given the versions v1.0.0, v1.1.0, v2.0.0, two virtual tags "v1" and "v2" will be displayed.
+"v1" links to "v1.1.0" and "v2" links to "v2.0.0".
+Pushing a release "v2.0.1" will make "v2" automatically refer to "v2.0.1".
+
+This also works when you don't use the "v" prefix in your tags. The virtual tag will then also not have a "v" prefix.
 
 ## Mirroring with Webhooks
 
