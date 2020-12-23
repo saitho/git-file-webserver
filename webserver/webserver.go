@@ -1,8 +1,9 @@
 package webserver
 
 import (
-	"log"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type Webserver struct {
@@ -25,6 +26,9 @@ func (w *Webserver) Run() {
 		app.Handle(pattern, handler)
 	}
 
-	log.Printf("Serving with config at %s on HTTP port: %s\n", w.ConfigPath, w.Port)
-	log.Fatal(http.ListenAndServe("0.0.0.0:"+w.Port, app))
+	log.Infof("Serving with config at %s on HTTP port: %s\n", w.ConfigPath, w.Port)
+	err := http.ListenAndServe("0.0.0.0:"+w.Port, app)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

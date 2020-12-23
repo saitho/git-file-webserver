@@ -161,6 +161,13 @@ Given the repostory has two tags v1.0.0 and v1.1.0.
 For some reason, you exclude v1.1.0 via a filter.
 The virtual tag will then point to v1.0.0, not v1.1.0!
 
+### Logging
+
+A log file is created at `./logs.txt`.
+The setting `loc_level` can be used to set the logging level.
+
+Allowed values: debug, info, warning, error, panic
+Default: warning
 
 ## Mirroring with Webhooks
 

@@ -1,4 +1,5 @@
 ---
+log_level: info
 git:
   url: https://github.com/getstackhead/stackhead.git
   work_dir: schemas

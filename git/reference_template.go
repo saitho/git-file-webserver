@@ -5,6 +5,8 @@ import (
 	"path"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/saitho/static-git-file-server/rendering"
 )
 
@@ -18,8 +20,10 @@ func (ref *Reference) Render() (string, error) {
 	}
 
 	if !ref.isFolder(content, ref.FilePath) {
+		log.Debugf("Serving file content of '%s' from %s %s.", ref.FilePath, ref.Type, ref.Name)
 		return content, nil
 	}
+	log.Debugf("Rendering contents of folder (path: '%s', %s: %s)", ref.FilePath, ref.Type, ref.Name)
 	// Render HTML template for folders and list all files there
 
 	contentLines := strings.Split(content, "\n")

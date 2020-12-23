@@ -14,7 +14,8 @@ var GitUpdateModeCache = "cache"
 var GitUpdateModeWebhookGitHub = "webhook_github"
 
 type Config struct {
-	Git struct {
+	LogLevel string `yaml:"log_level" default:"warning"`
+	Git      struct {
 		Url       string
 		WorkDir   string `yaml:"work_dir"`
 		CacheTime int    `yaml:"cache_time"` // deprecated: use Git.Update.Cache.Time instead

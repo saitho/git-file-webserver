@@ -5,17 +5,47 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/markbates/pkger"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/saitho/static-git-file-server/config"
 	"github.com/saitho/static-git-file-server/git"
 	"github.com/saitho/static-git-file-server/rendering"
 	"github.com/saitho/static-git-file-server/webserver"
 )
+
+func initLoggers(cfg *config.Config) {
+	file, err := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	var logLevel log.Level
+	switch cfg.LogLevel {
+	case "info":
+		logLevel = log.InfoLevel
+	case "warning":
+		logLevel = log.WarnLevel
+	case "error":
+		logLevel = log.ErrorLevel
+	case "panic":
+		logLevel = log.PanicLevel
+	default:
+		logLevel = log.DebugLevel
+	}
+	log.SetLevel(logLevel)
+	mw := io.MultiWriter(os.Stdout, file)
+	log.SetOutput(mw)
+	formatter := new(log.TextFormatter)
+	formatter.ForceColors = true
+	log.SetFormatter(formatter)
+}
 
 func main() {
 	_ = pkger.Include("/tmpl")
@@ -28,10 +58,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	initLoggers(cfg)
 
 	client := &git.Client{Cfg: cfg}
 	initRepo := func() error {
 		if !client.IsUpToDate() {
+			log.Debugf("Downloading repository as repo was not cloned yet or is outdated by cache time.")
 			if err := client.DownloadRepository(); err != nil {
 				return err
 			}
@@ -62,9 +94,11 @@ func main() {
 		content, err := reference.Render()
 		if err != nil {
 			if git.IsErrGitFileNotFound(err) {
+				log.Warningf("File '%s' not found on %s %s.", reference.FilePath, reference.Type, reference.Name)
 				resp.Text(http.StatusNotFound, "Requested file not found.")
 				return
 			}
+			log.Errorf("Unexpected error during Git file lookup: %s", err)
 			resp.Text(http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -80,6 +114,7 @@ func main() {
 
 		latestTag, err := git.ResolveVirtualTag(client, majorVersion)
 		if err != nil {
+			log.Errorf("Unable to resolve tag %s", majorVersion)
 			resp.Text(http.StatusInternalServerError, fmt.Sprintf("Unable to resolve tag %s", majorVersion))
 			return
 		}
@@ -131,6 +166,7 @@ func main() {
 			LastUpdate:   time.Unix(client.GetUpdatedTime(), 0),
 		})
 		if err != nil {
+			log.Errorf("Unable to render index template: %s", err)
 			resp.Text(http.StatusInternalServerError, err.Error())
 			return
 		}
