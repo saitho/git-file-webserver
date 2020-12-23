@@ -8,8 +8,8 @@ import (
 
 var re = regexp.MustCompile(`^(v?\d+)\.\d+\.\d+$`)
 
-func ResolveVirtualTag(gitHandler *GitHandler, virtualTag string) (GitTag, error) {
-	for _, tag := range gitHandler.GetTags() {
+func ResolveVirtualTag(client *Client, virtualTag string) (GitTag, error) {
+	for _, tag := range client.GetTags() {
 		majorTag := re.FindStringSubmatch(tag.Tag)
 		if len(majorTag) < 2 {
 			continue

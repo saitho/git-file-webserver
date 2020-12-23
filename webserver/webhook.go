@@ -12,7 +12,7 @@ import (
 	"github.com/saitho/static-git-file-server/git"
 )
 
-func processGitHubWebhook(cfg *config.Config, gitHandler *git.GitHandler) http.Handler {
+func processGitHubWebhook(cfg *config.Config, client *git.Client) http.Handler {
 	secret := cfg.Git.Update.WebHook.GitHub.Secret
 	if os.Getenv("TEST_MODE") == "1" {
 		secret = ""
@@ -21,14 +21,14 @@ func processGitHubWebhook(cfg *config.Config, gitHandler *git.GitHandler) http.H
 		if strings.TrimSuffix(payload.Repository.CloneURL, ".git") != strings.TrimSuffix(cfg.Git.Url, ".git") {
 			return fmt.Errorf("webhook clone URL does not match configured clone URL")
 		}
-		if err := gitHandler.DownloadRepository(); err != nil {
+		if err := client.DownloadRepository(); err != nil {
 			return err
 		}
 		return nil
 	})
 }
 
-func GitHubWebHookEndpoint(cfg *config.Config, gitHandler *git.GitHandler) Handler {
+func GitHubWebHookEndpoint(cfg *config.Config, client *git.Client) Handler {
 	return func(resp *Response, req *Request) {
 		if cfg.Git.Update.Mode != config.GitUpdateModeWebhookGitHub {
 			resp.Text(http.StatusUnauthorized, "Webhook is disabled.")
@@ -37,7 +37,7 @@ func GitHubWebHookEndpoint(cfg *config.Config, gitHandler *git.GitHandler) Handl
 
 		switch cfg.Git.Update.Mode {
 		case config.GitUpdateModeWebhookGitHub:
-			processGitHubWebhook(cfg, gitHandler).ServeHTTP(resp, req.Request)
+			processGitHubWebhook(cfg, client).ServeHTTP(resp, req.Request)
 		default:
 			resp.Text(http.StatusInternalServerError, "Unknown webhook update mode.")
 		}

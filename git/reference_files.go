@@ -11,31 +11,31 @@ func IsErrGitFileNotFound(err error) bool {
 	return err.Error() == "exit status 128"
 }
 
-func (g *GitHandler) getFileContent(refType string, refName string, filePath string) (string, error) {
-	return g.runGitCommand("show", g.getShowRef(refType, refName, filePath))
+func (ref *Reference) getFileContent(filePath string) (string, error) {
+	return ref.Client.runGitCommand("show", ref.GetShowRef(filePath))
 }
 
-func (g *GitHandler) isFolder(content string, refType string, refName string, filePath string) bool {
+func (ref *Reference) isFolder(content string, filePath string) bool {
 	contentLines := strings.Split(content, "\n")
-	return contentLines[0] == "tree "+g.getShowRef(refType, refName, filePath)
+	return contentLines[0] == "tree "+ref.GetShowRef(filePath)
 }
 
-func (g *GitHandler) matchesFileGlob(pathWithParent string, refType string, refName string) (bool, error) {
-	if len(g.Cfg.Files) == 0 {
+func (ref *Reference) matchesFileGlob(pathWithParent string) (bool, error) {
+	if len(ref.Client.Cfg.Files) == 0 {
 		return true, nil
 	}
-	fileContent, err := g.getFileContent(refType, refName, pathWithParent)
+	fileContent, err := ref.getFileContent(pathWithParent)
 	if err != nil {
 		return false, err
 	}
 
-	if g.isFolder(fileContent, refType, refName, pathWithParent) {
+	if ref.isFolder(fileContent, pathWithParent) {
 		filesInFolder := strings.Split(fileContent, "\n")[2:]
-		matchingFilesInFolder := g.filterFiles(filesInFolder, pathWithParent, refType, refName)
+		matchingFilesInFolder := ref.filterFiles(filesInFolder, pathWithParent)
 		// fmt.Printf("-- path is folder - %s - %d\n", pathWithParent, len(matchingFilesInFolder))
 		return len(matchingFilesInFolder) > 0, nil
 	} else {
-		for _, globString := range g.Cfg.Files {
+		for _, globString := range ref.Client.Cfg.Files {
 			regExp := glob.Globexp(globString)
 			matchPath := strings.TrimPrefix(pathWithParent, "/")
 			match := regExp.Match([]byte(matchPath))
@@ -48,14 +48,15 @@ func (g *GitHandler) matchesFileGlob(pathWithParent string, refType string, refN
 	return false, nil
 }
 
-func (g *GitHandler) filterFiles(files []string, parentFolder string, refType string, refName string) []string {
+func (ref *Reference) filterFiles(files []string, parentFolder string) []string {
 	var newFiles []string
 	for _, file := range files {
+		file = strings.TrimPrefix(file, "/")
 		if file == "" {
 			continue
 		}
 		pathWithParent := path.Join(parentFolder, file)
-		pathMatches, err := g.matchesFileGlob(pathWithParent, refType, refName)
+		pathMatches, err := ref.matchesFileGlob(pathWithParent)
 		if err != nil {
 			panic("matchesFileGlob: " + err.Error())
 		}

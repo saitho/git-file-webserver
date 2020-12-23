@@ -29,10 +29,10 @@ func main() {
 		panic(err)
 	}
 
-	gitHandler := &git.GitHandler{Cfg: cfg}
+	client := &git.Client{Cfg: cfg}
 	initRepo := func() error {
-		if !gitHandler.IsUpToDate() {
-			if err := gitHandler.DownloadRepository(); err != nil {
+		if !client.IsUpToDate() {
+			if err := client.DownloadRepository(); err != nil {
 				return err
 			}
 		}
@@ -52,7 +52,14 @@ func main() {
 		if len(req.Params) > 2 {
 			filePath = req.Params[2]
 		}
-		content, err := gitHandler.ServePath(req.Params[0], req.Params[1], filePath)
+
+		reference := git.Reference{
+			Client:   client,
+			Type:     req.Params[0],
+			Name:     strings.Trim(req.Params[1], "/"),
+			FilePath: strings.Trim(filePath, "/"),
+		}
+		content, err := reference.Render()
 		if err != nil {
 			if git.IsErrGitFileNotFound(err) {
 				resp.Text(http.StatusNotFound, "Requested file not found.")
@@ -71,7 +78,7 @@ func main() {
 			path = req.Params[1]
 		}
 
-		latestTag, err := git.ResolveVirtualTag(gitHandler, majorVersion)
+		latestTag, err := git.ResolveVirtualTag(client, majorVersion)
 		if err != nil {
 			resp.Text(http.StatusInternalServerError, fmt.Sprintf("Unable to resolve tag %s", majorVersion))
 			return
@@ -81,7 +88,7 @@ func main() {
 		handler(resp, req)
 	}
 
-	server.AddHandler(`^/webhook/github`, webserver.GitHubWebHookEndpoint(cfg, gitHandler))
+	server.AddHandler(`^/webhook/github`, webserver.GitHubWebHookEndpoint(cfg, client))
 	if cfg.Display.Tags.VirtualTags.EnableSemverMajor {
 		server.AddHandler(`^/tag/(v?\d+)/-/(.*)`, resolveVirtualMajorTag)
 		server.AddHandler(`^/tag/(v?\d+)/?$`, resolveVirtualMajorTag)
@@ -103,7 +110,7 @@ func main() {
 			LastUpdate   time.Time
 		}
 
-		tags := gitHandler.GetTags()
+		tags := client.GetTags()
 		if strings.ToLower(cfg.Display.Tags.Order) == "asc" {
 			// Reverse array
 			for i, j := 0, len(tags)-1; i < j; i, j = i+1, j-1 {
@@ -119,9 +126,9 @@ func main() {
 			Cfg:          cfg,
 			ShowBranches: cfg.Display.Index.ShowBranches,
 			ShowTags:     cfg.Display.Index.ShowTags,
-			Branches:     gitHandler.GetBranches(),
+			Branches:     client.GetBranches(),
 			Tags:         tags,
-			LastUpdate:   time.Unix(gitHandler.GetUpdatedTime(), 0),
+			LastUpdate:   time.Unix(client.GetUpdatedTime(), 0),
 		})
 		if err != nil {
 			resp.Text(http.StatusInternalServerError, err.Error())
