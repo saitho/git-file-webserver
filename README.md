@@ -6,7 +6,7 @@
 
 ## Features
 
-This is binary allows serving selective content of a Git repository.
+This binary allows serving selective content of a Git repository.
 The user can access those files per branch or tag.
 
 This was originally built for publishing up-to-date JSONSchema files per version.
@@ -14,6 +14,36 @@ This was originally built for publishing up-to-date JSONSchema files per version
 * Set up a **static file mirror** of your Git Repository
 * Limit display to **specific files**
 * Make files **accessible per branch or tag**
+
+## Live Demo
+
+Find a live demo here: https://schema.stackhead.io
+
+This demo serves all JSON files of the "schema" folder of the [StackHead repository](https://github.com/getstackhead/stackhead).
+
+Configuration:
+```yaml
+---
+git:
+  url: https://github.com/getstackhead/stackhead.git
+  work_dir: schemas
+  update:
+    mode: webhook_github
+    webhook:
+      github:
+        secret: 'REDACTED'
+files:
+  - "**/*.json"
+display:
+  branches:
+    filter:
+      - master
+      - next
+  tags:
+    show_date: false
+    virtual_tags:
+      enable_semver_major: true
+```
 
 ## Usage
 
