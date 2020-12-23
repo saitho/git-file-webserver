@@ -1,14 +1,14 @@
 <html>
 <head>
-    <title>Index of {{ .Path }}/ on {{ .RefType }} {{ .Ref }}</title>
+    <title>Index of {{ .Ref.FilePath }}/ on {{ .Ref.Type }} {{ .Ref.Name }}</title>
 </head>
 <body>
-<h1>Index of {{ .Path }}/ on {{ .RefType }} <i>{{ .Ref }}</i></h1>
-<h2>Git Remote: {{ .Cfg.Git.Url }}</h2>
+<h1>Index of {{ .Ref.FilePath }}/ on {{ .Ref.Type }} <i>{{ .Ref.Name }}</i></h1>
+<h2>Git Remote: {{ .Ref.Client.Cfg.Git.Url }}</h2>
 <hr>
 <pre>
-{{ if ne .Path "" }}<a href="/{{ $.RefType }}/{{ $.Ref }}/-/{{ .ParentPath }}">../</a>{{ end }}
-{{ range $value := .Files }}<a href="/{{ $.RefType }}/{{ $.Ref }}/-/{{ $.Path }}/{{ . }}">{{ . }}<br></a>{{ end }}
+{{ if ne .Ref.FilePath "" }}<a href="/{{ JoinPaths $.Ref.Type $.Ref.Name }}/-/{{ .ParentPath }}">../</a>{{ end }}
+{{ range $value := .Files }}<a href="/{{ JoinPaths $.Ref.Type $.Ref.Name }}/-/{{ JoinPaths $.Ref.FilePath . }}">{{ . }}<br></a>{{ end }}
 </pre>
 <hr>
 </body></html>

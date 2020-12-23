@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"html/template"
 	"io/ioutil"
-	"strings"
+	"path/filepath"
 
 	"github.com/markbates/pkger"
 )
 
 func RenderTemplate(path string, params interface{}) (string, error) {
 	tplFuncMap := make(template.FuncMap)
-	tplFuncMap["Split"] = strings.Split
+	tplFuncMap["JoinPaths"] = filepath.Join
 
 	f, _ := pkger.Open(path)
 	defer f.Close()
