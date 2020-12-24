@@ -125,12 +125,15 @@ func main() {
 
 	server.AddHandler(`^/webhook/github`, webserver.GitHubWebHookEndpoint(cfg, client))
 	if cfg.Display.Tags.VirtualTags.EnableSemverMajor {
-		server.AddHandler(`^/tag/(v?\d+)/-/(.*)`, resolveVirtualMajorTag)
+		server.AddHandler(`^/tag/(v?\d+)/-/(.*)$`, resolveVirtualMajorTag)
 		server.AddHandler(`^/tag/(v?\d+)/?$`, resolveVirtualMajorTag)
 	}
 
-	server.AddHandler(`^/(branch|tag)/(.*)/-/(.*)`, handler)
+	server.AddHandler(`^/(branch|tag)/(.*)/-/(.*)$`, handler)
 	server.AddHandler(`^/(branch|tag)/(.*)/?$`, handler)
+	server.AddHandler(`^/(branch|tag)/?$`, func(resp *webserver.Response, req *webserver.Request) {
+		http.Redirect(resp, req.Request, "/", http.StatusPermanentRedirect)
+	})
 	server.AddHandler(`^/$`, func(resp *webserver.Response, req *webserver.Request) {
 		if err := initRepo(); err != nil {
 			resp.Text(http.StatusInternalServerError, err.Error())

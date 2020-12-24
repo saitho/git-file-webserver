@@ -1,12 +1,13 @@
 package webserver
 
 import (
-	"github.com/saitho/static-git-file-server/config"
 	"io"
 	"net/http"
 	"regexp"
 
 	"github.com/gabriel-vasile/mimetype"
+
+	"github.com/saitho/static-git-file-server/config"
 )
 
 type Handler func(*Response, *Request)
