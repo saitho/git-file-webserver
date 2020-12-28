@@ -53,7 +53,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - run: |
-          gox -parallel 4 -osarch="linux/amd64 darwin/amd64 linux/arm windows/amd64" -ldflags="-extldflags '-static' -s -w -X github.com/saitho/git-file-webserver/main.VERSION=${{steps.semrel.outputs.version}}" -output="bin/{{.Dir}}_v${{steps.semrel.outputs.version}}_{{.OS}}_{{.Arch}}" .
+          gox -parallel 4 -osarch="linux/amd64 darwin/amd64 linux/arm windows/amd64" -ldflags="-extldflags '-static' -s -w -X github.com/saitho/git-file-webserver/config.VERSION=${{steps.semrel.outputs.version}}" -output="bin/{{.Dir}}_v${{steps.semrel.outputs.version}}_{{.OS}}_{{.Arch}}" .
           cd bin/ && shasum -a 256 * > ./git-file-webserver_v${{steps.semrel.outputs.version}}_checksums.txt && cd -
         if: steps.semrel.outputs.version != ''
         env:
