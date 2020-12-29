@@ -9,8 +9,8 @@ import (
 
 var re = regexp.MustCompile(`^(v?\d+)\.\d+\.\d+$`)
 
-func ResolveVirtualTag(client *Client, virtualTag string) (GitTag, error) {
-	for _, tag := range client.GetTags(client.CurrentRepo) {
+func ResolveVirtualTag(client ClientInterface, virtualTag string) (GitTag, error) {
+	for _, tag := range client.GetTags(client.GetCurrentRepo()) {
 		majorTag := re.FindStringSubmatch(tag.Tag)
 		if len(majorTag) < 2 {
 			continue

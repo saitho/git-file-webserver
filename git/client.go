@@ -7,9 +7,20 @@ import (
 	"github.com/saitho/static-git-file-server/config"
 )
 
+type ClientInterface interface {
+	GetRepositoryBySlug(slug string) *config.RepoConfig
+	SelectRepository(slug string) error
+	GetTags(repo *config.RepoConfig) []GitTag
+	GetCurrentRepo() *config.RepoConfig
+}
+
 type Client struct {
 	Cfg         *config.Config
 	CurrentRepo *config.RepoConfig
+}
+
+func (c *Client) GetCurrentRepo() *config.RepoConfig {
+	return c.CurrentRepo
 }
 
 func (c *Client) GetRepositoryBySlug(slug string) *config.RepoConfig {

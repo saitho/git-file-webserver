@@ -33,15 +33,16 @@ func (c *Client) GetTags(repo *config.RepoConfig) []GitTag {
 
 func (c *Client) GetAllTags(repo *config.RepoConfig) []GitTag {
 	tags := c.GetTags(repo)
+
+	if c.Cfg.Display.Tags.VirtualTags.EnableSemverMajor {
+		tags = InsertVirtualTags(tags)
+	}
+
 	if strings.ToLower(c.Cfg.Display.Tags.Order) == "asc" {
 		// Reverse array
 		for i, j := 0, len(tags)-1; i < j; i, j = i+1, j-1 {
 			tags[i], tags[j] = tags[j], tags[i]
 		}
-	}
-
-	if c.Cfg.Display.Tags.VirtualTags.EnableSemverMajor {
-		tags = InsertVirtualTags(tags)
 	}
 
 	return tags
