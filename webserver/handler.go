@@ -101,6 +101,7 @@ func IndexHandler(client *git.Client) func(resp *Response, req *Request) {
 			Tags         []git.GitTag
 			LastUpdate   time.Time
 			Client       *git.Client
+			Version      string
 		}
 
 		cfg := client.Cfg
@@ -109,6 +110,7 @@ func IndexHandler(client *git.Client) func(resp *Response, req *Request) {
 			ShowBranches: cfg.Display.Index.ShowBranches,
 			ShowTags:     cfg.Display.Index.ShowTags,
 			Client:       client,
+			Version:      config.VERSION,
 		})
 		if err != nil {
 			log.Errorf("Unable to render index template: %s", err)

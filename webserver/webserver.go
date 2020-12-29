@@ -5,6 +5,8 @@ import (
 	"regexp"
 
 	log "github.com/sirupsen/logrus"
+
+	"github.com/saitho/static-git-file-server/config"
 )
 
 type Webserver struct {
@@ -27,6 +29,7 @@ func (w *Webserver) Run() {
 		app.Handle(route)
 	}
 
+	log.Infof("Git File Webserver (version %s) by Mario Lubenka\n", config.VERSION)
 	log.Infof("Serving with config at %s on HTTP port: %s\n", w.ConfigPath, w.Port)
 	err := http.ListenAndServe("0.0.0.0:"+w.Port, app)
 	if err != nil {
