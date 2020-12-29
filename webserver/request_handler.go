@@ -32,11 +32,8 @@ func NewRequestHandler() *RequestHandler {
 	return app
 }
 
-func (a *RequestHandler) Handle(pattern string, handler Handler) {
-	re := regexp.MustCompile(pattern)
-	route := Route{Pattern: re, Handler: handler}
-
-	a.Routes = append(a.Routes, route)
+func (a *RequestHandler) Handle(route *Route) {
+	a.Routes = append(a.Routes, *route)
 }
 
 func (a *RequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
