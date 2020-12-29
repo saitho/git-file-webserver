@@ -13,23 +13,41 @@ var VERSION = "dev"
 var GitUpdateModeCache = "cache"
 var GitUpdateModeWebhookGitHub = "webhook_github"
 
+type RepoConfig struct {
+	Url     string
+	WorkDir string `yaml:"work_dir"`
+	Update  struct {
+		Mode  string `default:"cache"` // cache or webhook_github
+		Cache struct {
+			Time int `yaml:"time"`
+		}
+		WebHook struct {
+			GitHub struct {
+				Secret string
+			}
+		} `yaml:"webhook"`
+	}
+}
+
 type Config struct {
 	LogLevel string `yaml:"log_level" default:"warning"`
 	Git      struct {
-		Url       string
-		WorkDir   string `yaml:"work_dir"`
-		CacheTime int    `yaml:"cache_time"` // deprecated: use Git.Update.Cache.Time instead
+		Repositories []RepoConfig
+
+		Url       string // deprecated: Use setting from Repositories instead
+		WorkDir   string `yaml:"work_dir"`   // deprecated: Use setting from Repositories instead
+		CacheTime int    `yaml:"cache_time"` // deprecated: use Repositories[].Git.Update.Cache.Time instead
 		Update    struct {
-			Mode  string `default:"cache"` // cache or webhook_github
+			Mode  string `default:"cache"` // deprecated: Use setting from Repositories instead
 			Cache struct {
-				Time int `yaml:"time"`
-			}
+				Time int `yaml:"time"` // deprecated: Use setting from Repositories instead
+			} // deprecated: Use setting from Repositories instead
 			WebHook struct {
-				GitHub struct {
-					Secret string
+				GitHub struct { // deprecated: Use setting from Repositories instead
+					Secret string // deprecated: Use setting from Repositories instead
 				}
-			} `yaml:"webhook"`
-		}
+			} `yaml:"webhook"` // deprecated: Use setting from Repositories instead
+		} // deprecated: Use setting from Repositories instead
 	}
 	Display struct {
 		Branches struct {
@@ -71,6 +89,16 @@ func LoadConfig(configPath string) (*Config, error) {
 	if cfg.Git.CacheTime > 0 {
 		cfg.Git.Update.Cache.Time = cfg.Git.CacheTime
 		fmt.Printf("Configuration setting Git.CacheTime is deprecated. Use Git.Update.Cache.Time instead.")
+	}
+	if len(cfg.Git.Repositories) == 0 {
+		if len(cfg.Git.Url) > 0 || len(cfg.Git.WorkDir) > 0 || len(cfg.Git.Update.Mode) > 0 || cfg.Git.Update.Cache.Time > 0 || len(cfg.Git.Update.WebHook.GitHub.Secret) > 0 {
+			cfg.Git.Repositories = []RepoConfig{{
+				Url:     cfg.Git.Url,
+				WorkDir: cfg.Git.WorkDir,
+				Update:  cfg.Git.Update,
+			}}
+			fmt.Printf("Configuration settings in Git other than Repositories are deprecated. Define them inside 'repositories' array.")
+		}
 	}
 
 	return cfg, nil
