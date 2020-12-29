@@ -5,7 +5,7 @@
 <main>
     {{ range $repo := .Cfg.Git.Repositories }}
     <section>
-            <h2>Git Remote: {{ $repo.Url }}</h2>
+            <h2>{{ $repo.Title }} <small>(Git Remote: {{ $repo.Url }})</small></h2>
             <h3>Last Update: {{ $repo.GetUpdatedTimeObject }}</h3>
 
         {{ if $.ShowBranches }}

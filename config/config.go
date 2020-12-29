@@ -21,6 +21,7 @@ var GitUpdateModeWebhookGitHub = "webhook_github"
 const DownloadLocation = "./git_downloads"
 
 type RepoConfig struct {
+	Title   string
 	Slug    string
 	Url     string
 	WorkDir string `yaml:"work_dir"`
@@ -135,8 +136,10 @@ func LoadConfig(configPath string) (*Config, error) {
 		if len(cfg.Git.Url) > 0 || len(cfg.Git.WorkDir) > 0 || len(cfg.Git.Update.Mode) > 0 || cfg.Git.Update.Cache.Time > 0 || len(cfg.Git.Update.WebHook.GitHub.Secret) > 0 {
 			trimmedUrl := strings.TrimSuffix(cfg.Git.Url, ".git")
 			urlParts := strings.Split(trimmedUrl, "/")
+			slug := strings.Join(urlParts[len(urlParts)-2:], "/")
 			cfg.Git.Repositories = []*RepoConfig{{
-				Slug:    strings.Join(urlParts[len(urlParts)-2:], "/"),
+				Title:   slug,
+				Slug:    slug,
 				Url:     cfg.Git.Url,
 				WorkDir: cfg.Git.WorkDir,
 				Update:  cfg.Git.Update,

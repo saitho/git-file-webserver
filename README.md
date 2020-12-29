@@ -88,15 +88,18 @@ The repository needs to be setup manually for that (see below).
 ```yaml
 ---
 git:
-  url: https://github.com/getstackhead/stackhead.git
-  work_dir: schemas
-  update:
-    mode: cache # either "cache" (default) or "webhook_github"
-    cache:
-       time: 3600 # default: 60 minutes
-    webhook:
-      github:
-        secret: foobar # secret to be used with GitHub webhook
+  repositories:
+    - title: StackHead
+      slug: stackhead
+      url: https://github.com/getstackhead/stackhead.git
+      work_dir: schemas
+      update:
+        mode: cache # either "cache" (default) or "webhook_github"
+        cache:
+           time: 3600 # default: 60 minutes
+        webhook:
+          github:
+            secret: foobar # secret to be used with GitHub webhook
 ```
 
 ### File settings

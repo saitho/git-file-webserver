@@ -2,7 +2,9 @@
 log_level: info
 git:
   repositories:
-    - url: https://github.com/getstackhead/stackhead.git
+    - title: StackHead
+      slug: stackhead
+      url: https://github.com/getstackhead/stackhead.git
       work_dir: schemas
       update:
         mode: cache
