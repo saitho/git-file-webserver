@@ -8,3 +8,12 @@ func Contains(arr []string, str string) bool {
 	}
 	return false
 }
+
+func Unpack(s []string, vars ...*string) {
+	for i, str := range s {
+		if vars[i] == nil {
+			continue
+		}
+		*vars[i] = str
+	}
+}

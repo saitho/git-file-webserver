@@ -14,7 +14,7 @@ type Client struct {
 
 func (c *Client) GetRepositoryBySlug(slug string) *config.RepoConfig {
 	for _, repository := range c.Cfg.Git.Repositories {
-		if strings.ToLower(repository.Slug) == strings.ToLower(slug) {
+		if strings.EqualFold(repository.Slug, slug) {
 			return repository
 		}
 	}

@@ -75,15 +75,13 @@ func main() {
 		ConfigPath: *configPath,
 	}
 
-	server.AddHandler(`^/?$`, webserver.IndexHandler(client))
-	server.AddHandler(`^/(.*)/webhook/github`, webserver.GitHubWebHookEndpoint(client))
+	server.AddHandler(`(?U)^/?$`, webserver.IndexHandler(client))
+	server.AddHandler(`(?U)^/(.*)/webhook/github`, webserver.GitHubWebHookEndpoint(client))
 	if cfg.Display.Tags.VirtualTags.EnableSemverMajor {
-		server.AddHandler(`^/(.*)/tag/(v?\d+)/-/(.*)$`, webserver.ResolveVirtualMajorTag(client))
-		server.AddHandler(`^/(.*)/tag/(v?\d+)/?$`, webserver.ResolveVirtualMajorTag(client))
+		server.AddHandler(`(?U)^/(.*)/tag/(v?\d+)(/?|/-/(.*))$`, webserver.ResolveVirtualMajorTag(client))
 	}
 
-	server.AddHandler(`^/(.*)/(branch|tag)/(.*)/-/(.*)$`, webserver.FileHandler(client))
-	server.AddHandler(`^/(.*)/(branch|tag)/(.*)/?$`, webserver.FileHandler(client))
+	server.AddHandler(`(?U)^/(.*)/(branch|tag)/(.*)(/?|/-/(.*))$`, webserver.FileHandler(client))
 
 	configureRouteRedirects(&server, cfg)
 

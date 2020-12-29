@@ -4,6 +4,7 @@ import (
 	"path"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/godo.v2/glob"
 )
 
@@ -32,14 +33,14 @@ func (ref *Reference) matchesFileGlob(pathWithParent string) (bool, error) {
 	if ref.isFolder(fileContent, pathWithParent) {
 		filesInFolder := strings.Split(fileContent, "\n")[2:]
 		matchingFilesInFolder := ref.filterFiles(filesInFolder, pathWithParent)
-		// fmt.Printf("-- path is folder - %s - %d\n", pathWithParent, len(matchingFilesInFolder))
+		log.Tracef("-- path is folder - %s - %d\n", pathWithParent, len(matchingFilesInFolder))
 		return len(matchingFilesInFolder) > 0, nil
 	} else {
 		for _, globString := range ref.Client.Cfg.Files {
 			regExp := glob.Globexp(globString)
 			matchPath := strings.TrimPrefix(pathWithParent, "/")
 			match := regExp.Match([]byte(matchPath))
-			// fmt.Printf("-- path is file - %s - %s- %b\n", matchPath, regExp, match)
+			log.Tracef("-- path is file - %s - %s- %v\n", matchPath, regExp, match)
 			if match {
 				return true, nil
 			}

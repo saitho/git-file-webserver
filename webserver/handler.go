@@ -11,6 +11,7 @@ import (
 	"github.com/saitho/static-git-file-server/config"
 	"github.com/saitho/static-git-file-server/git"
 	"github.com/saitho/static-git-file-server/rendering"
+	"github.com/saitho/static-git-file-server/utils"
 )
 
 func initRepo(client *git.Client, repoSlug string) error {
@@ -33,15 +34,13 @@ func initRepo(client *git.Client, repoSlug string) error {
 
 func ResolveVirtualMajorTag(client *git.Client) func(resp *Response, req *Request) {
 	return func(resp *Response, req *Request) {
-		repoSlug := req.Params[0]
+		// params: SLUG/tag/MAJORVERSION/-/PATH...
+		var repoSlug, majorVersion, path string
+		utils.Unpack(req.Params, &repoSlug, &majorVersion, nil, &path)
+
 		if err := initRepo(client, repoSlug); err != nil {
 			resp.Text(http.StatusInternalServerError, err.Error())
 			return
-		}
-		majorVersion := req.Params[1]
-		path := ""
-		if len(req.Params) > 2 {
-			path = req.Params[2]
 		}
 
 		latestTag, err := git.ResolveVirtualTag(client, majorVersion)
@@ -57,21 +56,20 @@ func ResolveVirtualMajorTag(client *git.Client) func(resp *Response, req *Reques
 }
 
 func FileHandler(client *git.Client) func(resp *Response, req *Request) {
-	fmt.Println("FileHandler")
+	// params: SLUG/TYPE/REFNAME/-/PATH
 	return func(resp *Response, req *Request) {
-		if err := initRepo(client, req.Params[0]); err != nil {
+		var slug, refType, refName, filePath string
+		utils.Unpack(req.Params, &slug, &refType, &refName, nil, &filePath)
+
+		if err := initRepo(client, slug); err != nil {
 			resp.Text(http.StatusInternalServerError, err.Error())
 			return
-		}
-		filePath := ""
-		if len(req.Params) > 3 {
-			filePath = req.Params[3]
 		}
 
 		reference := git.Reference{
 			Client:   client,
-			Type:     req.Params[1],
-			Name:     strings.Trim(req.Params[2], "/"),
+			Type:     refType,
+			Name:     strings.Trim(refName, "/"),
 			FilePath: strings.Trim(filePath, "/"),
 		}
 		content, err := reference.Render()
