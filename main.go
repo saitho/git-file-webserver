@@ -43,6 +43,19 @@ func initLoggers(cfg *config.Config) {
 	log.SetFormatter(formatter)
 }
 
+func configureRouteRedirects(server *webserver.Webserver, cfg *config.Config) {
+	// Redirect single-repo path to new multi-repo path
+	server.AddHandler(`^/webhook/github`, func(resp *webserver.Response, req *webserver.Request) {
+		http.Redirect(resp, req.Request, "/"+cfg.Git.Repositories[0].Slug+"/webhook/github", http.StatusPermanentRedirect)
+	})
+	server.AddHandler(`^/(branch|tag)/(.*)$`, func(resp *webserver.Response, req *webserver.Request) {
+		http.Redirect(resp, req.Request, "/"+cfg.Git.Repositories[0].Slug+"/"+req.Params[0]+"/"+req.Params[1], http.StatusPermanentRedirect)
+	})
+	server.AddHandler(`^/(.+)/(branch|tag)/?$`, func(resp *webserver.Response, req *webserver.Request) {
+		http.Redirect(resp, req.Request, "/", http.StatusPermanentRedirect)
+	})
+}
+
 func main() {
 	_ = pkger.Include("/tmpl")
 
@@ -62,6 +75,7 @@ func main() {
 		ConfigPath: *configPath,
 	}
 
+	server.AddHandler(`^/?$`, webserver.IndexHandler(client))
 	server.AddHandler(`^/(.*)/webhook/github`, webserver.GitHubWebHookEndpoint(client))
 	if cfg.Display.Tags.VirtualTags.EnableSemverMajor {
 		server.AddHandler(`^/(.*)/tag/(v?\d+)/-/(.*)$`, webserver.ResolveVirtualMajorTag(client))
@@ -71,18 +85,7 @@ func main() {
 	server.AddHandler(`^/(.*)/(branch|tag)/(.*)/-/(.*)$`, webserver.FileHandler(client))
 	server.AddHandler(`^/(.*)/(branch|tag)/(.*)/?$`, webserver.FileHandler(client))
 
-	// Redirect single-repo path to new multi-repo path
-	server.AddHandler(`^/webhook/github`, func(resp *webserver.Response, req *webserver.Request) {
-		http.Redirect(resp, req.Request, "/"+cfg.Git.Repositories[0].Slug+"/webhook/github", http.StatusPermanentRedirect)
-	})
-	server.AddHandler(`^/(branch|tag)/(.*)$`, func(resp *webserver.Response, req *webserver.Request) {
-		http.Redirect(resp, req.Request, "/"+cfg.Git.Repositories[0].Slug+"/"+req.Params[0]+"/"+req.Params[1], http.StatusPermanentRedirect)
-	})
+	configureRouteRedirects(&server, cfg)
 
-	server.AddHandler(`^/(branch|tag)/?$`, func(resp *webserver.Response, req *webserver.Request) {
-		http.Redirect(resp, req.Request, "/", http.StatusPermanentRedirect)
-	})
-	server.AddHandler(`^/$`, webserver.IndexHandler(client))
 	server.Run()
-
 }

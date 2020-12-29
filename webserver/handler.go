@@ -50,7 +50,6 @@ func ResolveVirtualMajorTag(client *git.Client) func(resp *Response, req *Reques
 			resp.Text(http.StatusInternalServerError, fmt.Sprintf("Unable to resolve tag %s", majorVersion))
 			return
 		}
-		fmt.Println(latestTag)
 
 		req.Params = []string{repoSlug, "tag", latestTag.Tag, path}
 		FileHandler(client)(resp, req)
@@ -58,6 +57,7 @@ func ResolveVirtualMajorTag(client *git.Client) func(resp *Response, req *Reques
 }
 
 func FileHandler(client *git.Client) func(resp *Response, req *Request) {
+	fmt.Println("FileHandler")
 	return func(resp *Response, req *Request) {
 		if err := initRepo(client, req.Params[0]); err != nil {
 			resp.Text(http.StatusInternalServerError, err.Error())

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -11,6 +12,8 @@ import (
 	"github.com/creasty/defaults"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
+
+	"github.com/saitho/static-git-file-server/utils"
 )
 
 var VERSION = "dev"
@@ -111,6 +114,21 @@ type Config struct {
 	Files []string
 }
 
+func validateSlugs(cfg *Config) error {
+	var slugs []string
+	slugBlacklist := []string{"tag", "branch", "webhook"}
+	for _, repository := range cfg.Git.Repositories {
+		if utils.Contains(slugBlacklist, strings.ToLower(repository.Slug)) {
+			return fmt.Errorf("the slug %s is not allowed as it conflicts with internal routes", repository.Slug)
+		}
+		if utils.Contains(slugs, strings.ToLower(repository.Slug)) {
+			return fmt.Errorf("the slug %s is defined multiple times in configuration", repository.Slug)
+		}
+		slugs = append(slugs, repository.Slug)
+	}
+	return nil
+}
+
 func LoadConfig(configPath string) (*Config, error) {
 	cfg := &Config{}
 	_ = defaults.Set(cfg)
@@ -148,5 +166,8 @@ func LoadConfig(configPath string) (*Config, error) {
 		}
 	}
 
+	if err := validateSlugs(cfg); err != nil {
+		return nil, err
+	}
 	return cfg, nil
 }
