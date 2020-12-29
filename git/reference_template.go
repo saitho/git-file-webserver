@@ -20,10 +20,10 @@ func (ref *Reference) Render() (string, error) {
 	}
 
 	if !ref.isFolder(content, ref.FilePath) {
-		log.Debugf("Serving file content of '%s' from %s %s.", ref.FilePath, ref.Type, ref.Name)
+		log.Debugf("Serving file content of '%s' from %s %s (repo %s).", ref.FilePath, ref.Type, ref.Name, ref.Client.CurrentRepo.Slug)
 		return content, nil
 	}
-	log.Debugf("Rendering contents of folder (path: '%s', %s: %s)", ref.FilePath, ref.Type, ref.Name)
+	log.Debugf("Rendering contents of folder (repo: '%s', path: '%s', %s: %s)", ref.Client.CurrentRepo.Slug, ref.FilePath, ref.Type, ref.Name)
 	// Render HTML template for folders and list all files there
 
 	contentLines := strings.Split(content, "\n")
@@ -36,8 +36,8 @@ func (ref *Reference) Render() (string, error) {
 	return rendering.RenderTemplate("/tmpl/dir.html", TmplParams{
 		Ref:            ref,
 		ParentPath:     parentPath,
-		FullPath:       path.Join(ref.Client.Cfg.Git.WorkDir, ref.FilePath),
-		FullParentPath: path.Join(ref.Client.Cfg.Git.WorkDir, parentPath),
+		FullPath:       path.Join(ref.Client.CurrentRepo.WorkDir, ref.FilePath),
+		FullParentPath: path.Join(ref.Client.CurrentRepo.WorkDir, parentPath),
 		Files:          ref.filterFiles(contentLines[2:], ref.FilePath),
 	})
 }

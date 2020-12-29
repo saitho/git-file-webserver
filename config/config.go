@@ -1,10 +1,15 @@
 package config
 
 import (
-	"fmt"
+	"io/ioutil"
 	"os"
+	"path"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/creasty/defaults"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
@@ -13,7 +18,10 @@ var VERSION = "dev"
 var GitUpdateModeCache = "cache"
 var GitUpdateModeWebhookGitHub = "webhook_github"
 
+const DownloadLocation = "./git_downloads"
+
 type RepoConfig struct {
+	Slug    string
 	Url     string
 	WorkDir string `yaml:"work_dir"`
 	Update  struct {
@@ -29,10 +37,43 @@ type RepoConfig struct {
 	}
 }
 
+func (r *RepoConfig) GetDownloadPath() string {
+	return path.Join(DownloadLocation, r.Url)
+}
+
+func (r *RepoConfig) GetCacheFilePath() string {
+	return path.Join(r.GetDownloadPath() + ".cache")
+}
+
+func (r *RepoConfig) GetUpdatedTime() int64 {
+	cacheFile, _ := ioutil.ReadFile(r.GetCacheFilePath())
+	cacheTime, _ := strconv.Atoi(string(cacheFile))
+	return int64(cacheTime)
+}
+
+func (r *RepoConfig) GetUpdatedTimeObject() time.Time {
+	return time.Unix(r.GetUpdatedTime(), 0)
+}
+
+func (r *RepoConfig) IsUpToDate() bool {
+	// File does not exist
+	_, err := os.Stat(r.GetDownloadPath())
+	if os.IsNotExist(err) {
+		return false
+	}
+
+	if r.Update.Mode != GitUpdateModeCache {
+		return true
+	}
+
+	// Check if cache is up to date (within cacheTime interval)
+	return time.Now().Unix() <= (r.GetUpdatedTime() + int64(r.Update.Cache.Time))
+}
+
 type Config struct {
 	LogLevel string `yaml:"log_level" default:"warning"`
 	Git      struct {
-		Repositories []RepoConfig
+		Repositories []*RepoConfig
 
 		Url       string // deprecated: Use setting from Repositories instead
 		WorkDir   string `yaml:"work_dir"`   // deprecated: Use setting from Repositories instead
@@ -88,16 +129,19 @@ func LoadConfig(configPath string) (*Config, error) {
 	// Deprecations
 	if cfg.Git.CacheTime > 0 {
 		cfg.Git.Update.Cache.Time = cfg.Git.CacheTime
-		fmt.Printf("Configuration setting Git.CacheTime is deprecated. Use Git.Update.Cache.Time instead.")
+		log.Warnf("Configuration setting Git.CacheTime is deprecated. Use Git.Update.Cache.Time instead.")
 	}
 	if len(cfg.Git.Repositories) == 0 {
 		if len(cfg.Git.Url) > 0 || len(cfg.Git.WorkDir) > 0 || len(cfg.Git.Update.Mode) > 0 || cfg.Git.Update.Cache.Time > 0 || len(cfg.Git.Update.WebHook.GitHub.Secret) > 0 {
-			cfg.Git.Repositories = []RepoConfig{{
+			trimmedUrl := strings.TrimSuffix(cfg.Git.Url, ".git")
+			urlParts := strings.Split(trimmedUrl, "/")
+			cfg.Git.Repositories = []*RepoConfig{{
+				Slug:    strings.Join(urlParts[len(urlParts)-2:], "/"),
 				Url:     cfg.Git.Url,
 				WorkDir: cfg.Git.WorkDir,
 				Update:  cfg.Git.Update,
 			}}
-			fmt.Printf("Configuration settings in Git other than Repositories are deprecated. Define them inside 'repositories' array.")
+			log.Warnf("Configuration settings in Git other than Repositories are deprecated. Define them inside 'repositories' array.")
 		}
 	}
 

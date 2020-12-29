@@ -3,10 +3,12 @@ package git
 import (
 	"regexp"
 	"strings"
+
+	"github.com/saitho/static-git-file-server/config"
 )
 
-func (c *Client) GetBranches() []string {
-	output, _ := c.runGitCommand("branch", "-l", "-r", "--no-color")
+func (c *Client) GetBranches(repo *config.RepoConfig) []string {
+	output, _ := c.runGitCommand(repo, "branch", "-l", "-r", "--no-color")
 	var branches []string
 	for _, v := range strings.Split(output, "\n") {
 		v = strings.TrimSpace(v)

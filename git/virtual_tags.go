@@ -2,14 +2,15 @@ package git
 
 import (
 	"fmt"
-	"github.com/saitho/static-git-file-server/utils"
 	"regexp"
+
+	"github.com/saitho/static-git-file-server/utils"
 )
 
 var re = regexp.MustCompile(`^(v?\d+)\.\d+\.\d+$`)
 
 func ResolveVirtualTag(client *Client, virtualTag string) (GitTag, error) {
-	for _, tag := range client.GetTags() {
+	for _, tag := range client.GetTags(client.CurrentRepo) {
 		majorTag := re.FindStringSubmatch(tag.Tag)
 		if len(majorTag) < 2 {
 			continue

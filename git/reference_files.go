@@ -12,7 +12,7 @@ func IsErrGitFileNotFound(err error) bool {
 }
 
 func (ref *Reference) getFileContent(filePath string) (string, error) {
-	return ref.Client.runGitCommand("show", ref.GetShowRef(filePath))
+	return ref.Client.runGitCommand(ref.Client.CurrentRepo, "show", ref.GetShowRef(filePath))
 }
 
 func (ref *Reference) isFolder(content string, filePath string) bool {

@@ -15,7 +15,7 @@ type Reference struct {
 }
 
 func (ref *Reference) GetShowRef(filePath string) string {
-	dirPath := path.Join(".", ref.Client.Cfg.Git.WorkDir, filePath)
+	dirPath := path.Join(".", ref.Client.CurrentRepo.WorkDir, filePath)
 	if dirPath == "." {
 		dirPath += "/"
 	}

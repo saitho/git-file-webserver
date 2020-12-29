@@ -4,7 +4,7 @@
 </head>
 <body>
 <h1>Index of {{ .Ref.FilePath }}/ on {{ .Ref.Type }} <i>{{ .Ref.Name }}</i></h1>
-<h2>Git Remote: {{ .Ref.Client.Cfg.Git.Url }}</h2>
+<h2>Git Remote: {{ .Ref.Client.CurrentRepo.Url }}</h2>
 <hr>
 <pre>
 {{ if ne .Ref.FilePath "" }}<a href="/{{ JoinPaths $.Ref.Type $.Ref.Name }}/-/{{ .ParentPath }}">../</a>{{ end }}

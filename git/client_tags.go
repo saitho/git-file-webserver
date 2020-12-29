@@ -4,6 +4,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/saitho/static-git-file-server/config"
 )
 
 type GitTag struct {
@@ -11,8 +13,8 @@ type GitTag struct {
 	Date time.Time
 }
 
-func (c *Client) GetTags() []GitTag {
-	output, _ := c.runGitCommand("for-each-ref", "--sort=-creatordate", "--format=%(refname)---%(creatordate)", "refs/tags")
+func (c *Client) GetTags(repo *config.RepoConfig) []GitTag {
+	output, _ := c.runGitCommand(repo, "for-each-ref", "--sort=-creatordate", "--format=%(refname)---%(creatordate)", "refs/tags")
 	var tags []GitTag
 	for _, v := range strings.Split(output, "\n") {
 		if v == "" {
@@ -27,6 +29,22 @@ func (c *Client) GetTags() []GitTag {
 	}
 
 	return c.filterTags(tags)
+}
+
+func (c *Client) GetAllTags(repo *config.RepoConfig) []GitTag {
+	tags := c.GetTags(repo)
+	if strings.ToLower(c.Cfg.Display.Tags.Order) == "asc" {
+		// Reverse array
+		for i, j := 0, len(tags)-1; i < j; i, j = i+1, j-1 {
+			tags[i], tags[j] = tags[j], tags[i]
+		}
+	}
+
+	if c.Cfg.Display.Tags.VirtualTags.EnableSemverMajor {
+		tags = InsertVirtualTags(tags)
+	}
+
+	return tags
 }
 
 func (c *Client) filterTags(references []GitTag) []GitTag {

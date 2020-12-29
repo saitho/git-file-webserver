@@ -1,29 +1,37 @@
 <header>
-    <h1>Git Repo</h1>
-    <h2>Git Remote: {{ .Cfg.Git.Url }}</h2>
-    <h3>Last Update: {{ .LastUpdate }}</h3>
+    <h1>Git File Webserver</h1>
 </header>
 
 <main>
-{{ if .ShowBranches }}
-    <h2>Branches</h2>
-    {{ if not .Branches }}
-        This repository has no branches yet.
-    {{ else }}
-        {{ range .Branches }}<a href="/branch/{{ . }}">{{ . }}<br></a>{{ end }}
-    {{ end }}
-{{ end }}
+    {{ range $repo := .Cfg.Git.Repositories }}
+    <section>
+            <h2>Git Remote: {{ $repo.Url }}</h2>
+            <h3>Last Update: {{ $repo.GetUpdatedTimeObject }}</h3>
 
-{{ if .ShowTags }}
-    <h2>Tags</h2>
-    {{ if not .Tags }}
-        This repository has no tags yet.
-    {{ else }}
-        {{ range .Tags }}
-            <a href="/tag/{{ .Tag }}">{{ .Tag }} {{ if $.Cfg.Display.Tags.ShowDate }}({{ .Date }}){{ end }}<br/></a>
+        {{ if $.ShowBranches }}
+            <h3>Branches</h3>
+            {{ $branches := $.Client.GetBranches $repo }}
+            {{ if not $branches }}
+                This repository has no branches yet.
+            {{ else }}
+                {{ range $branches }}<a href="/{{ $repo.Slug }}/branch/{{ . }}">{{ . }}<br></a>{{ end }}
+            {{ end }}
         {{ end }}
+
+        {{ if $.ShowTags }}
+            <h3>Tags</h3>
+            {{ $tags := $.Client.GetAllTags $repo }}
+            {{ if not $tags }}
+                This repository has no tags yet.
+            {{ else }}
+                {{ range $tags }}
+                <a href="/{{ $repo.Slug }}/tag/{{ .Tag }}">{{ .Tag }} {{ if $.Cfg.Display.Tags.ShowDate }}({{ .Date }}){{ end }}<br/></a>
+                {{ end }}
+            {{ end }}
+        {{ end }}
+    </section>
     {{ end }}
-{{ end }}
+
 </main>
 
 <footer>
