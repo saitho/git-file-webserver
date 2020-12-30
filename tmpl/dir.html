@@ -1,9 +1,9 @@
 <html>
 <head>
-    <title>Index of {{ .Ref.FilePath }}/ on {{ .Ref.Type }} {{ .Ref.Name }}</title>
+    <title>Index of {{ .Ref.FilePath }}/ on {{ .Ref.Type }} {{ .Ref.GetName }}</title>
 </head>
 <body>
-<h1>Index of {{ .Ref.FilePath }}/ on {{ .Ref.Type }} <i>{{ .Ref.Name }}</i></h1>
+<h1>Index of {{ .Ref.FilePath }}/ on {{ .Ref.Type }} <i>{{ .Ref.GetName }}</i></h1>
 <h2>Git Remote: {{ .Ref.Client.CurrentRepo.Url }}</h2>
 <hr>
 <pre>
