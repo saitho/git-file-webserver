@@ -51,7 +51,7 @@ func ResolveVirtualMajorTag(client *git.Client) func(resp *Response, req *Reques
 		}
 
 		req.VirtualTag = majorVersion
-		req.Params = []string{repoSlug, "tag", latestTag.Tag, path}
+		req.Params = []string{repoSlug, "tag", latestTag.Tag, "-", path}
 		FileHandler(client)(resp, req)
 	}
 }
