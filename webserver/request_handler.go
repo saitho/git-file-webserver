@@ -56,7 +56,8 @@ func (a *RequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 type Request struct {
 	*http.Request
-	Params []string
+	Params     []string
+	VirtualTag string
 }
 
 type Response struct {

@@ -50,6 +50,7 @@ func ResolveVirtualMajorTag(client *git.Client) func(resp *Response, req *Reques
 			return
 		}
 
+		req.VirtualTag = majorVersion
 		req.Params = []string{repoSlug, "tag", latestTag.Tag, path}
 		FileHandler(client)(resp, req)
 	}
@@ -71,6 +72,9 @@ func FileHandler(client *git.Client) func(resp *Response, req *Request) {
 			Type:     refType,
 			Name:     strings.Trim(refName, "/"),
 			FilePath: strings.Trim(filePath, "/"),
+		}
+		if len(req.VirtualTag) > 0 {
+			reference.FromVirtualTag = req.VirtualTag
 		}
 		content, err := reference.Render()
 		if err != nil {

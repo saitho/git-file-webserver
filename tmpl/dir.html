@@ -7,8 +7,8 @@
 <h2>Git Remote: {{ .Ref.Client.CurrentRepo.Url }}</h2>
 <hr>
 <pre>
-{{ if ne .Ref.FilePath "" }}<a href="/{{ JoinPaths $.Ref.Client.CurrentRepo.Slug $.Ref.Type $.Ref.Name }}/-/{{ .ParentPath }}">../</a>{{ end }}
-{{ range $value := .Files }}<a href="/{{ JoinPaths $.Ref.Client.CurrentRepo.Slug $.Ref.Type $.Ref.Name }}/-/{{ JoinPaths $.Ref.FilePath . }}">{{ . }}<br></a>{{ end }}
+{{ if ne .Ref.FilePath "" }}<a href="/{{ $.Ref.GetPath }}/-/{{ .ParentPath }}">../</a>{{ end }}
+{{ range $value := .Files }}<a href="/{{ $.Ref.GetPath }}/-/{{ JoinPaths $.Ref.FilePath . }}">{{ . }}<br></a>{{ end }}
 </pre>
 <hr>
 </body></html>
