@@ -26,13 +26,25 @@ Configuration:
 ```yaml
 ---
 git:
-  url: https://github.com/getstackhead/stackhead.git
-  work_dir: schemas
-  update:
-    mode: webhook_github
-    webhook:
-      github:
-        secret: 'REDACTED'
+  repositories:
+    - title: StackHead
+      slug: stackhead
+      url: https://github.com/getstackhead/stackhead.git
+      work_dir: ansible/schemas
+      update:
+        mode: webhook_github
+        webhook:
+          github:
+            secret: 'REDACTED'
+    - title: StackHead CLI
+      slug: stackhead-cli
+      url: https://github.com/getstackhead/stackhead-cli.git
+      work_dir: schemas
+      update:
+        mode: webhook_github
+        webhook:
+          github:
+            secret: 'REDACTED'
 files:
   - "**/*.json"
 display:
@@ -194,7 +206,7 @@ Then, create your webhook on GitHub as follows:
 1. Go to your Repository Settings
 2. Select the "Webhooks" option in the left navigation menu
 3. Click the button "Add webhook" at the top right
-4. Add set your server URL as "Payload URL" (ending with `/webhook/github`), e.g. `https://schema.stackhead.io/webhook/github`
+4. Add set your server URL as "Payload URL" (ending with `/webhook/github`), e.g. `https://schema.stackhead.io/[your-repo-slug]/webhook/github`
 5. Select "application/json" as "Content type"
 6. Set your secret from configuration as "Secret"
 7. Choose the option "Let me select individual events." and enable the folowing events:
